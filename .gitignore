@@ -1,0 +1,6 @@
+#swap
+*.sw?
+# temporary
+*~
+# auto-generated tag files
+tags
