@@ -34,9 +34,9 @@ insert into inputs (entry, quantity) values ('DCL A4 200g', 1500);
 insert into inputs values (null, 'DCL SRA3 300g', 5800, null);
 insert into inputs values (null, 'DCL A4 300g', 1500, null);
 select 'work_unit';
-insert into work_units values ('buc'), ('ore'), ('mp'), ('proiect');  
+insert into work_units values ('buc'), ('ore'), ('mp'), ('proiect');
 select 'currencies';
-insert into currencies values ('ron'), ('eur'), ('usd');  
+insert into currencies values ('ron'), ('eur'), ('usd');
 select 'works';
 insert into works values (null, 'D.T.P catalog "Șhaorma de Aur"', 1, 'proiect', 138, 'eur');
 insert into works values (null, 'pliante "Țone de șârmărîe"', 1000, 'buc', 105, 'ron');
@@ -47,7 +47,7 @@ insert into work_stages values
 ('verificată', 'datele inițiale sunt aprobate, comanda e formulată corect', 2),
 ('dată în lucru', 'comanda se trimite în atelier, pentru execuție', 3),
 ('finalizată', 'comanda a fost executată', 4);
-select 'works_stages');
+select 'works_stages';
 insert into works_stages values
 (1, 'inițializată'), (1, 'verificată'),
 (2, 'inițializată'), (2, 'verificată'), (2, 'dată în lucru'),
