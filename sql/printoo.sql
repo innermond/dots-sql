@@ -79,10 +79,10 @@ create table works (
 	unit varchar(30) not null default 'buc',
 	unitprice numeric(15, 2),
 	currency varchar(15) not null default 'ron',
-	constraint works_unit_fk_work_units_unit foreign key (unit) references work_units (unit)	
+	constraint works_unit_fk_work_units_unit foreign key (unit) references work_units (unit)
 	on update cascade
 	on delete restrict,
-	constraint currencies_label_fk_works_currency foreign key (currency) references currencies (currency)	
+	constraint currencies_label_fk_works_currency foreign key (currency) references currencies (currency)
 	on update cascade
 	on delete restrict
 ) engine = innodb;
@@ -98,9 +98,9 @@ create table work_stages (
 create table works_stages (
 	work_id int unsigned not null,
 	stage varchar(20) not null,
-	constraint works_stages_id_fk_works_id foreign key (work_id) references works (ai_col)	
+	constraint works_stages_id_fk_works_id foreign key (work_id) references works (ai_col)
 	on delete cascade,
-	constraint works_stages_stage_fk_work_stages_stage foreign key (stage) references work_stages (stage)	
+	constraint works_stages_stage_fk_work_stages_stage foreign key (stage) references work_stages (stage)
 	on update cascade
 	on delete restrict
 ) engine = innodb;
@@ -109,7 +109,7 @@ create table works_stages (
 create table outputs (
 	works_id int unsigned not null,
 	inputs_id int unsigned not null,
-	quantity float not null default 0, 
+	quantity float not null default 0,
 	constraint outputs_works_id_fk_works_id foreign key (works_id) references works (ai_col)
 	on delete restrict,
 	constraint outputs_inputs_id_fk_inputs_id foreign key (inputs_id) references inputs (ai_col)
