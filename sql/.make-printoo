@@ -1,0 +1,3 @@
+#!/bin/bash
+cat init.sql tables/{traits.sql,entries.sql,works.sql,inputs-outputs.sql,persons.sql,companies.sql} > printoo.sql
+mysql -uroot -p < printoo.sql
