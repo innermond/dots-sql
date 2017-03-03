@@ -1,0 +1,6 @@
+#!/bin/bash
+# create table
+table=tables/"$1".sql
+populate=populate/"$1".sql
+if [ ! -f "$table" ]; then touch "$table"; fi
+if [ ! -f "$populate" ]; then touch "$populate"; fi

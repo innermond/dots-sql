@@ -1,3 +1,5 @@
 #!/bin/bash
-cat init.sql tables/{traits.sql,entries.sql,works.sql,inputs-outputs.sql,persons.sql,companies.sql} > printoo.sql
-mysql -uroot -p < printoo.sql
+common="{traits.sql,entries.sql,works.sql,inputs-outputs.sql,persons.sql,companies.sql}"
+eval "cat init.sql tables/$common > printoo.sql"
+eval "cat populate/$common > populate.sql"
+cat printoo.sql populate.sql | mysql -uroot -p

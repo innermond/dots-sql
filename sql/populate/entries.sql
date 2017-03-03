@@ -1,0 +1,14 @@
+select 'entries_code';
+insert into entries_code values ('DCL A4 150g');
+insert into entries_code values ('DCL A4 200g');
+insert into entries_code values ('DCL A4 300g');
+insert into entries_code values ('DCL SRA3 300g');
+select 'entries';
+insert into entries values ('DCL A4 150g', 2);
+insert into entries values ('DCL A4 150g', 8);
+insert into entries values ('DCL A4 200g', 2);
+insert into entries values ('DCL A4 200g', 9);
+insert into entries values ('DCL A4 300g', 2);
+insert into entries values ('DCL A4 300g', 10);
+insert into entries values ('DCL SRA3 300g', 1);
+insert into entries values ('DCL SRA3 300g', 10);
