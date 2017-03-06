@@ -7,7 +7,7 @@ create table companies (
 	address varchar(200),
 	is_client boolean not null default true, -- a company can be client or contractor or both
 	is_contractor boolean not null default false,
-	prefixname char(3) collate utf8mb4_unicode_ci generated always as (left(longname,3)) virtual,
+	prefixname char(3) generated always as (left(longname,3)),
 	unique key (tin),
 	unique key (rn),
 	key ix_cc (is_client,is_contractor),
