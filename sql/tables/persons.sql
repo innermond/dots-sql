@@ -6,6 +6,9 @@ create table persons (
   email varchar(30),
   is_male bit(1) not null,
   address varchar(200),
+	is_client boolean not null default false, -- a person can be client or contractor or both
+	is_contractor boolean not null default false,
+	key ix_cc (is_client,is_contractor),
   unique key (phone),
   unique key (email)
 ) engine = innodb;

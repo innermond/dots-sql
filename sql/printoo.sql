@@ -118,6 +118,9 @@ create table persons (
   email varchar(30),
   is_male bit(1) not null,
   address varchar(200),
+	is_client boolean not null default false, -- a person can be client or contractor or both
+	is_contractor boolean not null default false,
+	key ix_cc (is_client,is_contractor),
   unique key (phone),
   unique key (email)
 ) engine = innodb;
@@ -155,8 +158,13 @@ create table companies (
 	tin varchar(30) not null, -- taxpayer identification number, in RO is cui
 	rn varchar(30), -- registration number, in RO is J
 	address varchar(200),
+	is_client boolean not null default true, -- a company can be client or contractor or both
+	is_contractor boolean not null default false,
+	prefixname char(3) generated always as (left(longname,3)),
 	unique key (tin),
-	unique key (rn)
+	unique key (rn),
+	key ix_cc (is_client,is_contractor),
+  key ix_prefix3 (prefixname)
 ) engine = innodb;
 
 create table ibans (

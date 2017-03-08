@@ -53,18 +53,18 @@ insert into inputs (entry, quantity) values ('DCL A4 200g', 1500);
 insert into inputs values (null, 'DCL SRA3 300g', 5800, null);
 insert into inputs values (null, 'DCL A4 300g', 1500, null);
 insert into persons values
-(null, 'Gabriel Braila', '0723158571', 'gb@mob.ro', 1, 'Bucuresti, Ilioara 1A'),
-(default, 'Stoian Teodora', '0728032259', 'stoian.teodoara@gmail.com', false, 'Bucuresti Dristor'),
-(default, 'Gabor Toni', '0721032259', 'gt@gmail.com', true , 'Afumati, Centura'),
-(default, 'Bari Irinel', '0798032259', 'bari@gmail.com', b'1', 'Undeva cu credit'),
-(default, 'Wonder woman', '0728032659', 'ww@gmail.com', b'0', 'Undeva in spatiu');
+(null, 'Gabriel Braila', '0723158571', 'gb@mob.ro', 1, 'Bucuresti, Ilioara 1A', 0, 0),
+(default, 'Stoian Teodora', '0728032259', 'stoian.teodoara@gmail.com', false, 'Bucuresti Dristor', 0, 0),
+(default, 'Gabor Toni', '0721032259', 'gt@gmail.com', true , 'Afumati, Centura', 0, 0),
+(default, 'Bari Irinel', '0798032259', 'bari@gmail.com', b'1', 'Undeva cu credit', 0, 0),
+(default, 'Wonder woman', '0728032659', 'ww@gmail.com', b'0', 'Undeva in spatiu', 0, 0);
 insert into person_phones values
 (1, '072548677'),(1, '0745879652'),
 (2, '0736852497'),
 (3, '074998965');
 insert into companies values
-(null, 'sc volt-media srl', 'ro16728168', 'j40/14133/2004', 'lahovary 1a'),
-(null, 'sc tipografix house srl', 'ro22345120', 'j40/12133/2014', 'estacadei 1a');
+(null, 'sc volt-media srl', 'ro16728168', 'j40/14133/2004', 'lahovary 1a', false, true, default),
+(null, 'sc tipografix house srl', 'ro22345120', 'j40/12133/2014', 'estacadei 1a', false, true, default);
 insert into ibans values
 (1, 'rncb12345678974512', 'reifeissenbank suc. baba novac'),
 (1, 'rodev345678974512', 'procredit bank titan'),
