@@ -8,3 +8,8 @@ insert into person_phones values
 (1, '072548677'),(1, '0745879652'),
 (2, '0736852497'),
 (3, '074998965');
+insert into users
+(id, person_id, username, password) values
+(default, 1, "gabiuser1", "gabipass1"),
+(default, 1, "gabiuser2", "gabipass2"),
+(default, 2, "teouser1", "teopass1");

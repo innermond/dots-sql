@@ -32,7 +32,7 @@ create table person_emails (
 create table users (
   id int unsigned not null primary key auto_increment,
   person_id int unsigned not null,
-  username varchar(8) not null,
+  username varchar(16) not null,
   password varchar(64) not null,
   salt varchar(64) not null,
   unique key (username, password),
