@@ -114,8 +114,8 @@ create table outputs (
 create table persons (
   id int unsigned not null primary key auto_increment,
   longname varchar(50) not null,
-  phone varchar(15) not null default '', -- a missing value is represented by ""
-  email varchar(30) not null default '',
+  phone varchar(15) null, -- unique index allow unknown values as nulls
+  email varchar(30) null, 
   is_male bit(1) null, -- here null is unknown value
   address varchar(200) not null default '',
 	is_client boolean not null default false, -- a person can be client or contractor or both
@@ -127,7 +127,7 @@ create table persons (
 
 create table person_phones (
   person_id int unsigned not null,
-  phone varchar(15) not null default '',
+  phone varchar(15) not null,
   unique key (person_id, phone),
   constraint foreign key (person_id) references persons (id)
   on delete cascade
@@ -135,7 +135,7 @@ create table person_phones (
 
 create table person_emails (
   person_id int unsigned not null,
-  email varchar(30) not null default '',
+  email varchar(30) not null, 
   unique key (person_id, email),
   constraint foreign key (person_id) references persons (id)
   on delete cascade
