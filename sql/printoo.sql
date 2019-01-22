@@ -30,6 +30,7 @@ create table ibans (
 	constraint  foreign key (company_id) references companies (id)
 	on delete cascade
 ) engine = innodb;
+
 -- work_units exists as constraints for works
 create table work_units (
 	unit varchar(30) not null primary key
@@ -73,6 +74,7 @@ create table works_stages (
 	on update cascade
 	on delete restrict
 ) engine = innodb;
+
 -- persons
 create table persons (
   id int unsigned not null primary key auto_increment,
@@ -114,6 +116,7 @@ create table users (
   unique key (api_key),
   constraint foreign key (person_id) references persons (id)
 ) engine = innodb;
+
 -- constraint for entries label
 create table entries_code (
 	code varchar(50) not null primary key,
@@ -151,3 +154,4 @@ create table outputs (
 	constraint outputs_inputs_id_fk_inputs_id foreign key (inputs_id) references inputs (id)
 	on delete restrict
 ) engine = innodb;
+

@@ -35,3 +35,4 @@ create table outputs (
 	constraint outputs_inputs_id_fk_inputs_id foreign key (inputs_id) references inputs (id)
 	on delete restrict
 ) engine = innodb;
+

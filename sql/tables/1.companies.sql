@@ -22,3 +22,4 @@ create table ibans (
 	constraint  foreign key (company_id) references companies (id)
 	on delete cascade
 ) engine = innodb;
+

@@ -39,3 +39,4 @@ create table users (
   unique key (api_key),
   constraint foreign key (person_id) references persons (id)
 ) engine = innodb;
+
