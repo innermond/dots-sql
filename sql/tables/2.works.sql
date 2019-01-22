@@ -41,3 +41,4 @@ create table works_stages (
 	on update cascade
 	on delete restrict
 ) engine = innodb;
+

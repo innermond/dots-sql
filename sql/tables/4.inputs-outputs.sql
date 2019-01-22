@@ -1,3 +1,9 @@
+-- constraint for entries label
+create table entries_code (
+	code varchar(50) not null primary key,
+  description varchar(255) null
+) engine = innodb;
+
 -- inputs
 create table inputs (
 	id int unsigned not null primary key auto_increment,
@@ -29,3 +35,4 @@ create table outputs (
 	constraint outputs_inputs_id_fk_inputs_id foreign key (inputs_id) references inputs (id)
 	on delete restrict
 ) engine = innodb;
+
