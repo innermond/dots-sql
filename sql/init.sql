@@ -5,3 +5,4 @@ use printoo;
 -- database needs to store date in utc +0:00
 set session time_zone = '+0:00';
 set session sql_mode = 'traditional';
+
