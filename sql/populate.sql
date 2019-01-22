@@ -25,11 +25,11 @@ insert into works_stages values
 (2, 'inițializată'), (2, 'verificată'), (2, 'dată în lucru'),
 (3, 'inițializată'), (3, 'verificată'), (3, 'dată în lucru'), (3, 'finalizată');
 insert into persons values
-(null, 'Gabriel Braila', '0723158571', 'gb@mob.ro', 1, 'Bucuresti, Ilioara 1A', 0, 0),
+(null, 'Gabriel Braila', '0723158571', 'gb@mob.ro', true, 'Bucuresti, Ilioara 1A', 0, 0),
 (default, 'Stoian Teodora', '0728032259', 'stoian.teodoara@gmail.com', false, 'Bucuresti Dristor', 0, 0),
 (default, 'Gabor Toni', '0721032259', 'gt@gmail.com', true , 'Afumati, Centura', 0, 0),
-(default, 'Bari Irinel', '0798032259', 'bari@gmail.com', b'1', 'Undeva cu credit', 0, 0),
-(default, 'Wonder woman', '0728032659', 'ww@gmail.com', b'0', 'Undeva in spatiu', 0, 0);
+(default, 'Bari Irinel', '0798032259', 'bari@gmail.com', true, 'Undeva cu credit', 0, 0),
+(default, 'Wonder woman', '0728032659', 'ww@gmail.com', false, 'Undeva in spatiu', 0, 0);
 insert into person_phones values
 (1, '072548677'),(1, '0745879652'),
 (2, '0736852497'),

@@ -4,7 +4,7 @@ create table persons (
   longname varchar(50) not null,
   phone varchar(15) null, -- unique index allow unknown values as nulls
   email varchar(30) null, 
-  is_male bit(1) null, -- here null is unknown value
+  is_male boolean null, -- here null is unknown value
   address varchar(200) null,
 	is_client boolean not null default false, -- a person can be client or contractor or both
 	is_contractor boolean not null default false,
