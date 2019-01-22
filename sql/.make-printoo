@@ -1,5 +1,12 @@
 #!/bin/bash
-common="{traits.sql,entries.sql,works.sql,inputs-outputs.sql,persons.sql,companies.sql}"
-eval "cat init.sql tables/$common > printoo.sql"
-eval "cat populate/$common > populate.sql"
+common=""
+# files with sql extension from tables diectory
+for f in tables/*.sql;do
+  # repeat basename and a comma pattern
+  common="$common${f##*/},"
+done
+# remove last char, which is a comma
+common="${common%?}"
+eval "cat init.sql tables/{$common} > printoo.sql"
+eval "cat populate/{$common} > populate.sql"
 cat printoo.sql populate.sql | mysql -uroot -p

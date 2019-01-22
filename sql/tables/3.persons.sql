@@ -34,21 +34,8 @@ create table users (
   person_id int unsigned not null,
   username varchar(16) not null,
   password varchar(64) not null,
-  api_key varchar(64) not null,
+  api_key varchar(64) null,
   unique key (username, password),
   unique key (api_key),
   constraint foreign key (person_id) references persons (id)
 ) engine = innodb;
-
--- create salt when inserts occur
-
-delimiter //
-
-create trigger users_before_insert
-before insert on users for each row
-begin
-	set NEW.api_key = sha2(uuid(), 256);
-	set NEW.password = sha2(concat(NEW.password, NEW.api_key), 256);
-end; //
-
-delimiter ;
