@@ -59,14 +59,3 @@ create table person_emails (
   on delete cascade
 ) engine = innodb;
 
-create table users (
-  id int unsigned not null primary key auto_increment,
-  person_id int unsigned not null,
-  username varchar(16) not null,
-  password varchar(64) not null,
-  api_key varchar(64) null,
-  unique key (username, password),
-  unique key (api_key),
-  constraint foreign key (person_id) references persons (id)
-) engine = innodb;
-
