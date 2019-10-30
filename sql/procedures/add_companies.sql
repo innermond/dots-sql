@@ -32,12 +32,14 @@ begin
 			set is_contractor = false;
 			if rand() > 0.5 then set is_contractor = true; end if;
 			insert into companies values
-			(null, longname, tin, rn, address, is_client, is_contractor, default);
+			(null, longname, tin, rn, is_client, is_contractor, default);
 			
 			set oneormore = elt(floor(rand()*3+1), 0, 1, 2);
 			select left(uuid(), 50) into bankname;
 			select last_insert_id() into lid_company;
 			select left(uuid(), 34) into iban;
+			insert into company_addresses values
+			(lid_company, address);
 			insert into ibans values
 			(lid_company, iban, bankname);
 

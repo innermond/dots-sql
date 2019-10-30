@@ -3,9 +3,7 @@ create table users (
   id int unsigned not null primary key auto_increment,
   username varchar(16) not null,
   password varchar(64) not null, -- is hashed
-  api_key varchar(64) null,
-  unique key (username),
-  unique key (api_key)
+  unique key (username)
 ) engine = innodb;
 
 -- roles

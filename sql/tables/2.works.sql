@@ -5,7 +5,7 @@ create table work_units (
 
 -- currencies exists as constraints for works
 create table currencies (
-	currency varchar(15) not null primary key
+	currency char(3) not null primary key
 ) engine = innodb;
 
 -- works
@@ -15,7 +15,7 @@ create table works (
 	quantity float not null default 1,
 	unit varchar(30) not null default 'buc',
 	unitprice numeric(15, 2),
-	currency varchar(15) not null default 'ron',
+	currency char(3) not null default 'ron',
 	constraint works_unit_fk_work_units_unit foreign key (unit) references work_units (unit)
 	on update cascade
 	on delete restrict,

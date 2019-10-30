@@ -9,4 +9,5 @@ done
 common="${common%?}"
 eval "cat init.sql tables/{$common} > printoo.sql"
 eval "cat populate/{$common} > populate.sql"
-cat printoo.sql populate.sql | mysql -uroot -p
+cat printoo.sql populate.sql > pp.sql
+mysql -uprintoo.root -p < pp.sql

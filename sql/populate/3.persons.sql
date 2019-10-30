@@ -1,9 +1,11 @@
+start transaction;
 select 'users'; 
+-- test passords are gabiuser1 gabiuser2 teouser1
 insert into users
 (id, username, password) values
-(default, "gabiuser1", "$2a$04$1R5GldyuiTN/hpGUqcqchuFlyM7wib9c9J/cunII.VcanRwOv6h5C"),
-(default, "gabiuser2", "$2a$04$nAwdi3Drz1OkoVSfjpiS6Ojl33Kr1jjYrbQ/fb9AinSvoB7nVYxOW"),
-(default, "teouser1", "$2a$04$b9mu0F4h7TlWsVmHTZ401.12ITZImp5FWimNPZjf0p6T8WX.OIqdC");
+(default, "gabiuser1", "$2a$14$Aij9nZ5Dym2JJiiAc2nY..ZIlCTZrtGJSRqU9VwifPsdK8KL3Vzky"), 
+(default, "gabiuser2", "$2a$14$15TQeheQKVkI7bysOpeETe99ktHTH8xMrxuqd4oAunRRfz3JLf6Uy"), 
+(default, "teouser1", "$2a$14$klL5o18v1rub9FZzM50DDOg3ntE/GxZTLv8uYFd8KtF5wkxcU2Uqi"); 
 select 'persons';
 insert into persons values
 (null, 'Gabriel Braila', '0723158571', 'gb@mob.ro', true, 'Bucuresti, Ilioara 1A', 0, 0, 1),
@@ -28,3 +30,4 @@ insert into user_roles values
 (1, 'user'),
 (2, 'admin'),
 (3, 'user');
+commit;
