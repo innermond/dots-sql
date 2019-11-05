@@ -14,15 +14,18 @@ create table companies (
 ) engine = innodb;
 
 create table company_addresses (
+  id int unsigned not null primary key auto_increment,
   company_id int unsigned not null,
 	address varchar(200),
 	location point not null srid 4326,
+	unique key (address),
 	spatial key (location),
 	constraint  foreign key (company_id) references companies (id)
 	on delete cascade
 ) engine = innodb;
 
-create table ibans (
+create table company_ibans (
+  id int unsigned not null primary key auto_increment,
   company_id int unsigned not null,
 	iban char(34), -- International Bank Account Number
 	bankname varchar(50),
