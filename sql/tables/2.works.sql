@@ -26,10 +26,11 @@ create table works (
 
 -- every work pass to ordered stages
 create table work_stages (
-	stage varchar(20) not null primary key,
+	id int unsigned not null primary key auto_increment,
+	stage varchar(20) not null default "",
 	description varchar(150) null default "",
 	ordered int unsigned not null,
-	unique key (ordered)
+	unique key (stage, ordered)
 ) engine = innodb;
 
 create table works_stages (
