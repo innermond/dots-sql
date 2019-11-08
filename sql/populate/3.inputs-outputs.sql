@@ -1,0 +1,10 @@
+select 'entries_code';
+insert into entries_code values (@tid, 'DCL A4 150g', 'hartie dcl marime a4 gramaj 150g');
+insert into entries_code values (@tid, 'DCL A4 200g', 'hartie dcl marime a4 gramaj 200g');
+insert into entries_code values (@tid, 'DCL A4 300g', 'hartie dcl marime a4 gramaj 300g');
+insert into entries_code values (@tid, 'DCL SRA3 300g', 'hartie dcl marime sra3 gramaj 300g');
+select 'inputs';
+insert into inputs values (null, @tid,  'DCL A4 150g', 2500, default);
+insert into inputs (tid, entry, quantity) values (@tid, 'DCL A4 200g', 1500);
+insert into inputs values (null, @tid,  'DCL SRA3 300g', 5800, null);
+insert into inputs values (null, @tid, 'DCL A4 300g', 1500, null);
