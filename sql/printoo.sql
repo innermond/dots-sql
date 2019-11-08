@@ -32,7 +32,11 @@ create table company_addresses (
 	on delete cascade
 ) engine = innodb;
 
+<<<<<<< HEAD
 create table company_ibans (
+=======
+create table ibans (
+>>>>>>> 89e6d8a85b0c3b2675b5a5c9db07067d949b973f
   id int unsigned not null primary key auto_increment,
   company_id int unsigned not null,
 	iban char(34), -- International Bank Account Number
