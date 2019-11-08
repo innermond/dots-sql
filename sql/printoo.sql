@@ -22,6 +22,7 @@ create table companies (
 ) engine = innodb;
 
 create table company_addresses (
+  id int unsigned not null primary key auto_increment,
   company_id int unsigned not null,
 	address varchar(200),
 	location point not null srid 4326,
@@ -31,6 +32,7 @@ create table company_addresses (
 ) engine = innodb;
 
 create table ibans (
+  id int unsigned not null primary key auto_increment,
   company_id int unsigned not null,
 	iban char(34), -- International Bank Account Number
 	bankname varchar(50),
