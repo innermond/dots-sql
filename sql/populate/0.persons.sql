@@ -9,15 +9,19 @@ insert into users
 set @tid=last_insert_id();
 select 'persons';
 insert into persons values
-(null, @tid, 'Gabriel Braila', '0723158571', 'gb@mob.ro', true, 'Bucuresti, Ilioara 1A', 0, 0, 1),
-(default, @tid, 'Stoian Teodora', '0728032259', 'stoian.teodoara@gmail.com', false, 'Bucuresti Dristor', 0, 0, 3),
-(default, @tid, 'Gabor Toni', '0721032259', 'gt@gmail.com', true , 'Afumati, Centura', 0, 0, 2),
-(default, @tid, 'Bari Irinel', '0798032259', 'bari@gmail.com', true, 'Undeva cu credit', 0, 0, 2),
-(default, @tid, 'Wonder woman', '0728032659', 'ww@gmail.com', false, 'Undeva in spatiu', 0, 0, 3);
+(null, @tid, 'Gabriel Braila', '0723158571', 'gb@mob.ro', true, 'Bucuresti, Ilioara 1A', 0, 0),
+(default, @tid, 'Stoian Teodora', '0728032259', 'stoian.teodoara@gmail.com', false, 'Bucuresti Dristor', 0, 0),
+(default, @tid, 'Gabor Toni', '0721032259', 'gt@gmail.com', true , 'Afumati, Centura', 0, 0),
+(default, @tid, 'Bari Irinel', '0798032259', 'bari@gmail.com', true, 'Undeva cu credit', 0, 0),
+(default, @tid, 'Wonder woman', '0728032659', 'ww@gmail.com', false, 'Undeva in spatiu', 0, 0);
 insert into person_phones values
-(1, '072548677'),(1, '0745879652'),
-(2, '0736852497'),
-(3, '074998965');
+(1, @tid, '072548677'),(1, @tid, '0745879652'),
+(2, @tid, '0736852497'),
+(3, @tid, '074998965');
+insert into person_emails values
+(1, @tid, 'bg@bg.br'),(1, @tid, 'ab@ab.com'),
+(2, @tid, 'ba@ba.ro'),
+(3, @tid, 'cd@cd.com');
 select 'roles';
 insert into roles values
 ('anonymous'),
