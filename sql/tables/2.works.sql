@@ -63,7 +63,6 @@ create table works_stages (
 	stage varchar(20) not null,
 
 	constraint foreign key (work_id) references works (id)
-	on delete cascade
 	on update cascade,
 	constraint foreign key (stage) references work_stages (stage)
 	on update cascade

@@ -25,15 +25,15 @@ insert into users
 
 -- on delete users.id echoed field persons.tid will be set to 0 not null
 -- persons.tid is part of a primary key so cannot be set to null
-delimiter $$
+/*delimiter $$
 create trigger users_after_delete 
-before delete 
+after delete 
 on users for each row 
 begin
 update companies set tid=0 where tid=old.id;
 update persons set tid=0 where tid=old.id;
 end$$
-delimiter ;
+delimiter ;*/
 -- roles
 create table roles (
 	name varchar(16) not null primary key
@@ -47,11 +47,9 @@ create table user_roles (
 	unique key (user_id, role_name),
 
 	constraint foreign key (user_id) references users (id)
-	on delete cascade
 	on update cascade,
 	constraint foreign key (role_name) references roles (name)
 	on update cascade
-	on delete cascade
 ) engine = innodb;
 
 -- persons
@@ -73,10 +71,7 @@ create table persons (
   unique key (email, tid),
 
   constraint foreign key (tid) references users (id)
-	on delete restrict
 	on update cascade
-	-- WARN replaced on delete with a trigger
-	-- TODO create a trigger on delete users.id to set persons.tid 0
 ) engine = innodb;
 
 create table person_phones (
@@ -88,7 +83,6 @@ create table person_phones (
   unique key (person_id, tid, phone),
   
 	constraint foreign key (person_id, tid) references persons (id, tid)
-  on delete cascade
   on update cascade
 ) engine = innodb;
 
@@ -100,7 +94,6 @@ create table person_emails (
   
   unique key (person_id, tid, email),
   constraint foreign key (person_id, tid) references persons (id, tid)
-  on delete cascade
   on update cascade
 ) engine = innodb;
 commit;
@@ -126,7 +119,6 @@ create table companies (
     key ix_prefix3 (prefixname),
     
 		constraint  foreign key (tid) references users (id)
-		on delete restrict
 		on update cascade
 ) engine = innodb;
 
@@ -142,7 +134,6 @@ create table company_addresses (
     unique key (company_id, tid, id),
 
     constraint  foreign key (company_id, tid) references companies (id, tid)
-    on delete cascade
 		on update cascade
 ) engine = innodb;
 
@@ -156,7 +147,6 @@ create table company_ibans (
     primary key (company_id, iban, tid),
     
 		constraint  foreign key (company_id, tid) references companies (id, tid)
-    on delete cascade
 		on update cascade
 ) engine = innodb;
 
@@ -169,7 +159,6 @@ create table work_units (
 	primary key (unit, tid),
 
 	constraint foreign key (tid) references users (id)
-	on delete cascade
 	on update cascade
 ) engine = innodb;
 
@@ -182,7 +171,6 @@ create table currencies (
 	primary key (currency, tid),
 
 	constraint foreign key (tid) references users (id)
-	on delete cascade
 	on update cascade
 ) engine = innodb;
 
@@ -200,14 +188,11 @@ create table works (
 	primary key (id, tid), 
 
 	constraint foreign key (tid) references users (id)
-	on delete cascade
 	on update cascade,
 	constraint foreign key (unit) references work_units (unit)
 	on update cascade
-	on delete cascade,
 	constraint foreign key (currency) references currencies (currency)
 	on update cascade
-	on delete cascade
 ) engine = innodb;
 
 -- every work pass to ordered stages
@@ -222,7 +207,6 @@ create table work_stages (
 	unique key (tid, ordered),
 
 	constraint foreign key (tid) references users (id)
-	on delete cascade
 	on update cascade
 ) engine = innodb;
 
@@ -231,11 +215,9 @@ create table works_stages (
 	stage varchar(20) not null,
 
 	constraint foreign key (work_id) references works (id)
-	on delete cascade
 	on update cascade,
 	constraint foreign key (stage) references work_stages (stage)
 	on update cascade
-	on delete restrict
 ) engine = innodb;
 
 -- constraint for entries label
@@ -248,7 +230,6 @@ create table entries_code (
   unique key (code, tid),
 
 	constraint foreign key (tid) references users (id)
-	on delete cascade
 	on update cascade
 ) engine = innodb;
 
@@ -264,7 +245,6 @@ create table inputs (
 	primary key (id, tid),
 	
 	constraint foreign key (entry, tid) references entries_code (code, tid)
-	on delete cascade
 	on update cascade
 ) engine = innodb;
 
@@ -276,13 +256,10 @@ create table outputs (
 	quantity float not null default 0,
 	
 	constraint foreign key (tid) references users (id)
-	on delete cascade
 	on update cascade,
 	constraint foreign key (works_id) references works (id)
-	on delete cascade
 	on update cascade,
 	constraint foreign key (inputs_id) references inputs (id)
-	on delete cascade
 	on update cascade
 ) engine = innodb;
 
