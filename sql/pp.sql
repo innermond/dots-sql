@@ -190,7 +190,7 @@ create table works (
 	constraint foreign key (tid) references users (id)
 	on update cascade,
 	constraint foreign key (unit) references work_units (unit)
-	on update cascade
+	on update cascade,
 	constraint foreign key (currency) references currencies (currency)
 	on update cascade
 ) engine = innodb;
