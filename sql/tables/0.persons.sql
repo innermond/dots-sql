@@ -1,3 +1,4 @@
+start transaction;
 -- users
 create table users (
   id smallint unsigned not null primary key auto_increment,
@@ -6,8 +7,25 @@ create table users (
   password varchar(64) not null, -- is hashed
 
   unique key (username)
-) engine = innodb;
+) engine = innodb; 
+-- while 0 value is allowed for users.id
 
+-- need this zero user allowing set persons.tid = 0
+insert into users
+(id, username, password) values
+(0, "zerouser", "$2a$14$Aij9nZ5Dym2JJiiAc2nY..ZIlCTZrtGJSRqU9VwifPsdK8KL3Vzky");
+
+-- on delete users.id echoed field persons.tid will be set to 0 not null
+-- persons.tid is part of a primary key so cannot be set to null
+/*delimiter $$
+create trigger users_after_delete 
+after delete 
+on users for each row 
+begin
+update companies set tid=0 where tid=old.id;
+update persons set tid=0 where tid=old.id;
+end$$
+delimiter ;*/
 -- roles
 create table roles (
 	name varchar(16) not null primary key
@@ -21,10 +39,9 @@ create table user_roles (
 	unique key (user_id, role_name),
 
 	constraint foreign key (user_id) references users (id)
-	on delete cascade,
+	on update cascade,
 	constraint foreign key (role_name) references roles (name)
 	on update cascade
-	on delete cascade
 ) engine = innodb;
 
 -- persons
@@ -45,9 +62,8 @@ create table persons (
   unique key (phone, tid),
   unique key (email, tid),
 
-  constraint persons_tid_users_id foreign key (tid) references users (id)
-	on delete no action
-	-- TODO create a trigger on delete to set tid 0
+  constraint foreign key (tid) references users (id)
+	on update cascade
 ) engine = innodb;
 
 create table person_phones (
@@ -59,7 +75,7 @@ create table person_phones (
   unique key (person_id, tid, phone),
   
 	constraint foreign key (person_id, tid) references persons (id, tid)
-  on delete cascade
+  on update cascade
 ) engine = innodb;
 
 create table person_emails (
@@ -70,6 +86,7 @@ create table person_emails (
   
   unique key (person_id, tid, email),
   constraint foreign key (person_id, tid) references persons (id, tid)
-  on delete cascade
+  on update cascade
 ) engine = innodb;
+commit;
 

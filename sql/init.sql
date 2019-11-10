@@ -3,6 +3,6 @@ drop database if exists printoo;
 create database printoo character set = utf8mb4 collate = utf8mb4_unicode_ci;
 use printoo;
 -- database needs to store date in utc +0:00
-set session time_zone = '+0:00';
-set session sql_mode = 'traditional';
+set global time_zone = '+0:00';
+set global sql_mode = 'no_auto_value_on_zero';
 

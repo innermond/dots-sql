@@ -4,6 +4,7 @@ create table companies (
     id mediumint unsigned not null auto_increment,
     -- tenent id user id
     tid smallint unsigned not null,
+		primary key (id, tid), 
 
     longname varchar(50) not null,
     tin varchar(30) not null, -- taxpayer identification number, in RO is cui
@@ -12,13 +13,13 @@ create table companies (
     is_contractor boolean not null default false,
     prefixname char(3) generated always as (left(longname,3)),
     
-		primary key (id, tid), 
 		unique key (tin),
     unique key (rn),
     key ix_cc (is_client,is_contractor),
     key ix_prefix3 (prefixname),
     
 		constraint  foreign key (tid) references users (id)
+		on update cascade
 ) engine = innodb;
 
 create table company_addresses (
@@ -31,8 +32,9 @@ create table company_addresses (
    
 		key (id),
     unique key (company_id, tid, id),
+
     constraint  foreign key (company_id, tid) references companies (id, tid)
-    on delete cascade
+		on update cascade
 ) engine = innodb;
 
 create table company_ibans (
@@ -43,7 +45,8 @@ create table company_ibans (
     bankname varchar(50),
 
     primary key (company_id, iban, tid),
-    constraint  foreign key (company_id, tid) references companies (id, tid)
-    on delete cascade
+    
+		constraint  foreign key (company_id, tid) references companies (id, tid)
+		on update cascade
 ) engine = innodb;
 

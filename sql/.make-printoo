@@ -14,14 +14,14 @@ sqlfile=pp.sql
 if [ "$1" == create ]; then 
 	sqlfile=printoo.sql
 	echo "using $sqlfile"
-	mysql -uprintoo.root -p < $sqlfile
+	mysql -uroot -p < $sqlfile
 	exit 0
 fi
 if [ "$1" == fill ]; then 
 	sqlfile=populate.sql
 	echo "using $sqlfile"
-	mysql -uprintoo.root -p -D printoo < $sqlfile
+	mysql -uroot -p -D printoo < $sqlfile
 	exit 0
 fi
 echo "using $sqlfile"
-mysql -uprintoo.root -p < $sqlfile
+mysql -uroot -p < $sqlfile

@@ -8,7 +8,7 @@ create table entries_code (
   unique key (code, tid),
 
 	constraint foreign key (tid) references users (id)
-	on delete restrict
+	on update cascade
 ) engine = innodb;
 
 -- inputs
@@ -22,8 +22,7 @@ create table inputs (
 	
 	primary key (id, tid),
 	
-	constraint inputs_entry_fk_entries_code foreign key (entry, tid) references entries_code (code, tid)
-	on delete restrict
+	constraint foreign key (entry, tid) references entries_code (code, tid)
 	on update cascade
 ) engine = innodb;
 
@@ -34,11 +33,11 @@ create table outputs (
 	inputs_id bigint unsigned not null,
 	quantity float not null default 0,
 	
-	constraint outputs_works_id_fk_works_id foreign key (works_id) references works (id)
-	on delete restrict,
-	constraint outputs_inputs_id_fk_inputs_id foreign key (inputs_id) references inputs (id)
-	on delete restrict,
-	constraint outputs_users_id_fk_tid foreign key (tid) references users (id)
-	on delete restrict
+	constraint foreign key (tid) references users (id)
+	on update cascade,
+	constraint foreign key (works_id) references works (id)
+	on update cascade,
+	constraint foreign key (inputs_id) references inputs (id)
+	on update cascade
 ) engine = innodb;
 

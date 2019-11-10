@@ -3,9 +3,10 @@ drop database if exists printoo;
 create database printoo character set = utf8mb4 collate = utf8mb4_unicode_ci;
 use printoo;
 -- database needs to store date in utc +0:00
-set session time_zone = '+0:00';
-set session sql_mode = 'traditional';
+set global time_zone = '+0:00';
+set global sql_mode = 'no_auto_value_on_zero';
 
+start transaction;
 -- users
 create table users (
   id smallint unsigned not null primary key auto_increment,
@@ -14,8 +15,25 @@ create table users (
   password varchar(64) not null, -- is hashed
 
   unique key (username)
-) engine = innodb;
+) engine = innodb; 
+-- while 0 value is allowed for users.id
 
+-- need this zero user allowing set persons.tid = 0
+insert into users
+(id, username, password) values
+(0, "zerouser", "$2a$14$Aij9nZ5Dym2JJiiAc2nY..ZIlCTZrtGJSRqU9VwifPsdK8KL3Vzky");
+
+-- on delete users.id echoed field persons.tid will be set to 0 not null
+-- persons.tid is part of a primary key so cannot be set to null
+delimiter $$
+create trigger users_after_delete 
+before delete 
+on users for each row 
+begin
+update companies set tid=0 where tid=old.id;
+update persons set tid=0 where tid=old.id;
+end$$
+delimiter ;
 -- roles
 create table roles (
 	name varchar(16) not null primary key
@@ -29,7 +47,8 @@ create table user_roles (
 	unique key (user_id, role_name),
 
 	constraint foreign key (user_id) references users (id)
-	on delete cascade,
+	on delete cascade
+	on update cascade,
 	constraint foreign key (role_name) references roles (name)
 	on update cascade
 	on delete cascade
@@ -53,9 +72,11 @@ create table persons (
   unique key (phone, tid),
   unique key (email, tid),
 
-  constraint persons_tid_users_id foreign key (tid) references users (id)
-	on delete no action
-	-- TODO create a trigger on delete to set tid 0
+  constraint foreign key (tid) references users (id)
+	on delete restrict
+	on update cascade
+	-- WARN replaced on delete with a trigger
+	-- TODO create a trigger on delete users.id to set persons.tid 0
 ) engine = innodb;
 
 create table person_phones (
@@ -68,6 +89,7 @@ create table person_phones (
   
 	constraint foreign key (person_id, tid) references persons (id, tid)
   on delete cascade
+  on update cascade
 ) engine = innodb;
 
 create table person_emails (
@@ -79,7 +101,9 @@ create table person_emails (
   unique key (person_id, tid, email),
   constraint foreign key (person_id, tid) references persons (id, tid)
   on delete cascade
+  on update cascade
 ) engine = innodb;
+commit;
 
 -- companies
 create table companies (
@@ -87,6 +111,7 @@ create table companies (
     id mediumint unsigned not null auto_increment,
     -- tenent id user id
     tid smallint unsigned not null,
+		primary key (id, tid), 
 
     longname varchar(50) not null,
     tin varchar(30) not null, -- taxpayer identification number, in RO is cui
@@ -95,13 +120,14 @@ create table companies (
     is_contractor boolean not null default false,
     prefixname char(3) generated always as (left(longname,3)),
     
-		primary key (id, tid), 
 		unique key (tin),
     unique key (rn),
     key ix_cc (is_client,is_contractor),
     key ix_prefix3 (prefixname),
     
 		constraint  foreign key (tid) references users (id)
+		on delete restrict
+		on update cascade
 ) engine = innodb;
 
 create table company_addresses (
@@ -114,8 +140,10 @@ create table company_addresses (
    
 		key (id),
     unique key (company_id, tid, id),
+
     constraint  foreign key (company_id, tid) references companies (id, tid)
     on delete cascade
+		on update cascade
 ) engine = innodb;
 
 create table company_ibans (
@@ -126,8 +154,10 @@ create table company_ibans (
     bankname varchar(50),
 
     primary key (company_id, iban, tid),
-    constraint  foreign key (company_id, tid) references companies (id, tid)
+    
+		constraint  foreign key (company_id, tid) references companies (id, tid)
     on delete cascade
+		on update cascade
 ) engine = innodb;
 
 -- work_units exists as constraints for works
@@ -136,7 +166,11 @@ create table work_units (
 
 	unit varchar(30) not null,
 
-	primary key (unit, tid)
+	primary key (unit, tid),
+
+	constraint foreign key (tid) references users (id)
+	on delete cascade
+	on update cascade
 ) engine = innodb;
 
 -- currencies exists as constraints for works
@@ -145,7 +179,11 @@ create table currencies (
 	
 	currency char(3) not null,
 	
-	primary key (currency, tid)
+	primary key (currency, tid),
+
+	constraint foreign key (tid) references users (id)
+	on delete cascade
+	on update cascade
 ) engine = innodb;
 
 -- works
@@ -161,12 +199,15 @@ create table works (
 
 	primary key (id, tid), 
 
-	constraint works_unit_fk_work_units_unit foreign key (unit) references work_units (unit)
+	constraint foreign key (tid) references users (id)
+	on delete cascade
+	on update cascade,
+	constraint foreign key (unit) references work_units (unit)
 	on update cascade
-	on delete restrict,
-	constraint currencies_label_fk_works_currency foreign key (currency) references currencies (currency)
+	on delete cascade,
+	constraint foreign key (currency) references currencies (currency)
 	on update cascade
-	on delete restrict
+	on delete cascade
 ) engine = innodb;
 
 -- every work pass to ordered stages
@@ -178,16 +219,21 @@ create table work_stages (
 	ordered tinyint unsigned not null,
 
 	primary key (stage, tid),
-	unique key (tid, ordered)
+	unique key (tid, ordered),
+
+	constraint foreign key (tid) references users (id)
+	on delete cascade
+	on update cascade
 ) engine = innodb;
 
 create table works_stages (
 	work_id bigint unsigned not null,
 	stage varchar(20) not null,
 
-	constraint works_stages_id_fk_works_id foreign key (work_id) references works (id)
-	on delete cascade,
-	constraint works_stages_stage_fk_work_stages_stage foreign key (stage) references work_stages (stage)
+	constraint foreign key (work_id) references works (id)
+	on delete cascade
+	on update cascade,
+	constraint foreign key (stage) references work_stages (stage)
 	on update cascade
 	on delete restrict
 ) engine = innodb;
@@ -202,7 +248,8 @@ create table entries_code (
   unique key (code, tid),
 
 	constraint foreign key (tid) references users (id)
-	on delete restrict
+	on delete cascade
+	on update cascade
 ) engine = innodb;
 
 -- inputs
@@ -216,8 +263,8 @@ create table inputs (
 	
 	primary key (id, tid),
 	
-	constraint inputs_entry_fk_entries_code foreign key (entry, tid) references entries_code (code, tid)
-	on delete restrict
+	constraint foreign key (entry, tid) references entries_code (code, tid)
+	on delete cascade
 	on update cascade
 ) engine = innodb;
 
@@ -228,12 +275,15 @@ create table outputs (
 	inputs_id bigint unsigned not null,
 	quantity float not null default 0,
 	
-	constraint outputs_works_id_fk_works_id foreign key (works_id) references works (id)
-	on delete restrict,
-	constraint outputs_inputs_id_fk_inputs_id foreign key (inputs_id) references inputs (id)
-	on delete restrict,
-	constraint outputs_users_id_fk_tid foreign key (tid) references users (id)
-	on delete restrict
+	constraint foreign key (tid) references users (id)
+	on delete cascade
+	on update cascade,
+	constraint foreign key (works_id) references works (id)
+	on delete cascade
+	on update cascade,
+	constraint foreign key (inputs_id) references inputs (id)
+	on delete cascade
+	on update cascade
 ) engine = innodb;
 
 start transaction;
@@ -241,17 +291,17 @@ select 'users';
 -- test passords are gabiuser1 gabiuser2 teouser1
 insert into users
 (id, username, password) values
-(default, "gabiuser1", "$2a$14$Aij9nZ5Dym2JJiiAc2nY..ZIlCTZrtGJSRqU9VwifPsdK8KL3Vzky"), 
-(default, "gabiuser2", "$2a$14$15TQeheQKVkI7bysOpeETe99ktHTH8xMrxuqd4oAunRRfz3JLf6Uy"), 
-(default, "teouser1", "$2a$14$klL5o18v1rub9FZzM50DDOg3ntE/GxZTLv8uYFd8KtF5wkxcU2Uqi"); 
+(null, "gabiuser1", "$2a$14$Aij9nZ5Dym2JJiiAc2nY..ZIlCTZrtGJSRqU9VwifPsdK8KL3Vzky"), 
+(null, "gabiuser2", "$2a$14$15TQeheQKVkI7bysOpeETe99ktHTH8xMrxuqd4oAunRRfz3JLf6Uy"), 
+(null, "teouser1", "$2a$14$klL5o18v1rub9FZzM50DDOg3ntE/GxZTLv8uYFd8KtF5wkxcU2Uqi"); 
 set @tid=last_insert_id();
 select 'persons';
 insert into persons values
 (null, @tid, 'Gabriel Braila', '0723158571', 'gb@mob.ro', true, 'Bucuresti, Ilioara 1A', 0, 0),
-(default, @tid, 'Stoian Teodora', '0728032259', 'stoian.teodoara@gmail.com', false, 'Bucuresti Dristor', 0, 0),
-(default, @tid, 'Gabor Toni', '0721032259', 'gt@gmail.com', true , 'Afumati, Centura', 0, 0),
-(default, @tid, 'Bari Irinel', '0798032259', 'bari@gmail.com', true, 'Undeva cu credit', 0, 0),
-(default, @tid, 'Wonder woman', '0728032659', 'ww@gmail.com', false, 'Undeva in spatiu', 0, 0);
+(null, @tid, 'Stoian Teodora', '0728032259', 'stoian.teodoara@gmail.com', false, 'Bucuresti Dristor', 0, 0),
+(null, @tid, 'Gabor Toni', '0721032259', 'gt@gmail.com', true , 'Afumati, Centura', 0, 0),
+(null, @tid, 'Bari Irinel', '0798032259', 'bari@gmail.com', true, 'Undeva cu credit', 0, 0),
+(null, @tid, 'Wonder woman', '0728032659', 'ww@gmail.com', false, 'Undeva in spatiu', 0, 0);
 insert into person_phones values
 (1, @tid, '072548677'),(1, @tid, '0745879652'),
 (2, @tid, '0736852497'),
