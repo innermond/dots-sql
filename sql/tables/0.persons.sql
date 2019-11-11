@@ -46,8 +46,8 @@ create table user_roles (
 
 -- persons
 create table persons (
-  id mediumint unsigned not null auto_increment,
   tid smallint unsigned not null,
+  id smallint unsigned not null auto_increment,
 	primary key (id, tid), 
   
   longname varchar(50) not null,
@@ -67,8 +67,8 @@ create table persons (
 ) engine = innodb;
 
 create table person_phones (
-  person_id mediumint unsigned not null,
   tid smallint unsigned not null,
+  person_id smallint unsigned not null,
 
   phone varchar(15) not null,
   
@@ -79,8 +79,8 @@ create table person_phones (
 ) engine = innodb;
 
 create table person_emails (
-  person_id mediumint unsigned not null,
   tid smallint unsigned not null,
+  person_id smallint unsigned not null,
 
   email varchar(30) not null, 
   

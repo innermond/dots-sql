@@ -54,8 +54,8 @@ create table user_roles (
 
 -- persons
 create table persons (
-  id mediumint unsigned not null auto_increment,
   tid smallint unsigned not null,
+  id smallint unsigned not null auto_increment,
 	primary key (id, tid), 
   
   longname varchar(50) not null,
@@ -75,8 +75,8 @@ create table persons (
 ) engine = innodb;
 
 create table person_phones (
-  person_id mediumint unsigned not null,
   tid smallint unsigned not null,
+  person_id smallint unsigned not null,
 
   phone varchar(15) not null,
   
@@ -87,8 +87,8 @@ create table person_phones (
 ) engine = innodb;
 
 create table person_emails (
-  person_id mediumint unsigned not null,
   tid smallint unsigned not null,
+  person_id smallint unsigned not null,
 
   email varchar(30) not null, 
   
@@ -272,19 +272,19 @@ insert into users
 set @tid=last_insert_id();
 select 'persons';
 insert into persons values
-(null, @tid, 'Gabriel Braila', '0723158571', 'gb@mob.ro', true, 'Bucuresti, Ilioara 1A', 0, 0),
-(null, @tid, 'Stoian Teodora', '0728032259', 'stoian.teodoara@gmail.com', false, 'Bucuresti Dristor', 0, 0),
-(null, @tid, 'Gabor Toni', '0721032259', 'gt@gmail.com', true , 'Afumati, Centura', 0, 0),
-(null, @tid, 'Bari Irinel', '0798032259', 'bari@gmail.com', true, 'Undeva cu credit', 0, 0),
-(null, @tid, 'Wonder woman', '0728032659', 'ww@gmail.com', false, 'Undeva in spatiu', 0, 0);
+(@tid, null, 'Gabriel Braila', '0723158571', 'gb@mob.ro', true, 'Bucuresti, Ilioara 1A', 0, 0),
+(@tid, null, 'Stoian Teodora', '0728032259', 'stoian.teodoara@gmail.com', false, 'Bucuresti Dristor', 0, 0),
+(@tid, null, 'Gabor Toni', '0721032259', 'gt@gmail.com', true , 'Afumati, Centura', 0, 0),
+(@tid, null, 'Bari Irinel', '0798032259', 'bari@gmail.com', true, 'Undeva cu credit', 0, 0),
+(@tid, null, 'Wonder woman', '0728032659', 'ww@gmail.com', false, 'Undeva in spatiu', 0, 0);
 insert into person_phones values
-(1, @tid, '072548677'),(1, @tid, '0745879652'),
-(2, @tid, '0736852497'),
-(3, @tid, '074998965');
+(@tid, 1, '072548677'),(1, @tid, '0745879652'),
+(@tid, 2, '0736852497'),
+(@tid, 3, '074998965');
 insert into person_emails values
-(1, @tid, 'bg@bg.br'),(1, @tid, 'ab@ab.com'),
-(2, @tid, 'ba@ba.ro'),
-(3, @tid, 'cd@cd.com');
+(@tid, 1, 'bg@bg.br'),(1, @tid, 'ab@ab.com'),
+(@tid, 2, 'ba@ba.ro'),
+(@tid, 3, 'cd@cd.com');
 select 'roles';
 insert into roles values
 ('anonymous'),
