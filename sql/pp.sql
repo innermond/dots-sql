@@ -98,19 +98,21 @@ commit;
 create table companies (
     tid smallint unsigned not null,
     id tinyint unsigned not null auto_increment,
-		primary key (id, tid), 
 
     longname varchar(50) not null,
     tin varchar(30) not null, -- taxpayer identification number, in RO is cui
     rn varchar(30), -- registration number, in RO is J
     is_client boolean not null default true, -- a company can be client or contractor or both
     is_contractor boolean not null default false,
+		is_mine boolean not null default false, -- can emit bills
     prefixname char(3) generated always as (left(longname,3)),
     
-		unique key (tin),
-    unique key (rn),
-    key (is_client,is_contractor),
-    key (prefixname),
+		primary key (id, tid), 
+		unique key (tin, rn),
+    key (is_client, tid),
+    key (is_contractor, tid),
+    key (is_mine, tid),
+    key (prefixname, tid),
     
 		constraint  foreign key (tid) references users (id)
 ) engine = innodb;
@@ -182,6 +184,9 @@ create table works (
 ) engine = innodb;
 
 delimiter $$
+-- check if system defined or user defined currency values exists already
+-- insert only new values regarding systems ones and user (tid, currency)
+-- so other users (differnt tid) can have same currency value
 create trigger currencies_before_insert 
 before insert 
 on currencies for each row 
@@ -345,20 +350,28 @@ insert into user_roles values
 commit;
 start transaction;
 insert into companies values
-(@tid, null, 'sc volt-media srl', 'ro16728168', 'j40/14133/2004', false, true, default);
+(@tid, null, 'sc volt-media srl', 'ro16728168', 'j40/14133/2004', false, true, true, default);
 select last_insert_id() into @lastid;
 insert into company_ibans values
 (@tid, @lastid, 'rncb12345678974512', 'reifeissenbank suc. baba novac');
 insert into company_addresses values
 (@tid, @lastid, null, 'grivitei nr 37', null);
 insert into companies values
-(@tid, null, 'sc tipografix house srl', 'ro22345120', 'j40/12133/2014', false, true, default);
+(@tid, null, 'sc tipografix house srl', 'ro22345120', 'j40/12133/2014', false, true, true, default);
 select last_insert_id() into @lastid;
 insert into company_ibans values
 (@tid, @lastid, 'rodev345678974512', 'procredit bank titan'),
 (@tid, @lastid, 'as435345675676', 'procredit bank titan');
 insert into company_addresses values
 (@tid, @lastid, null, 'str. Stefan cel Mare', st_srid(point(80.0, 10.0), 4326));
+insert into companies values
+(@tid, null, 'sc client srl', 'ro22345110', 'j41/22133/2014', false, true, false, default);
+select last_insert_id() into @lastid;
+insert into company_ibans values
+(@tid, @lastid, 'rodev345678974512', 'procredit bank titan'),
+(@tid, @lastid, 'as435345675676', 'procredit bank titan');
+insert into company_addresses values
+(@tid, @lastid, null, 'str. Carpați', st_srid(point(80.04381, 10.4502), 4326));
 commit;
 select 'work_unit';
 insert into work_units values (@tid, 'buc'), (@tid, 'ore'), (@tid, 'mp'), (@tid, 'proiect');

@@ -4,6 +4,7 @@ create procedure add_companies
 (in peak int)
 begin
 
+	declare tid smallint;
 	declare	longname varchar(50);
 	declare tin varchar(30);
 	declare rn varchar(30);
