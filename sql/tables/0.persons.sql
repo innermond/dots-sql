@@ -38,8 +38,7 @@ create table user_roles (
 
 	unique key (user_id, role_name),
 
-	constraint foreign key (user_id) references users (id)
-	on update cascade,
+	constraint foreign key (user_id) references users (id),
 	constraint foreign key (role_name) references roles (name)
 	on update cascade
 ) engine = innodb;
@@ -47,7 +46,7 @@ create table user_roles (
 -- persons
 create table persons (
   tid smallint unsigned not null,
-  id smallint unsigned not null auto_increment,
+  id tinyint unsigned not null auto_increment,
 	primary key (id, tid), 
   
   longname varchar(50) not null,
@@ -63,30 +62,27 @@ create table persons (
   unique key (email, tid),
 
   constraint foreign key (tid) references users (id)
-	on update cascade
 ) engine = innodb;
 
 create table person_phones (
   tid smallint unsigned not null,
-  person_id smallint unsigned not null,
+  person_id tinyint unsigned not null,
 
   phone varchar(15) not null,
   
   unique key (person_id, tid, phone),
   
 	constraint foreign key (person_id, tid) references persons (id, tid)
-  on update cascade
 ) engine = innodb;
 
 create table person_emails (
   tid smallint unsigned not null,
-  person_id smallint unsigned not null,
+  person_id tinyint unsigned not null,
 
   email varchar(30) not null, 
   
   unique key (person_id, tid, email),
   constraint foreign key (person_id, tid) references persons (id, tid)
-  on update cascade
 ) engine = innodb;
 commit;
 

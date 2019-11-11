@@ -8,7 +8,6 @@ create table entries_code (
   unique key (code, tid),
 
 	constraint foreign key (tid) references users (id)
-	on update cascade
 ) engine = innodb;
 
 -- inputs
@@ -33,11 +32,8 @@ create table outputs (
 	inputs_id bigint unsigned not null,
 	quantity float not null default 0,
 	
-	constraint foreign key (tid) references users (id)
-	on update cascade,
-	constraint foreign key (works_id) references works (id)
-	on update cascade,
+	constraint foreign key (tid) references users (id),
+	constraint foreign key (works_id) references works (id),
 	constraint foreign key (inputs_id) references inputs (id)
-	on update cascade
 ) engine = innodb;
 

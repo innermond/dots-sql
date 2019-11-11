@@ -46,8 +46,7 @@ create table user_roles (
 
 	unique key (user_id, role_name),
 
-	constraint foreign key (user_id) references users (id)
-	on update cascade,
+	constraint foreign key (user_id) references users (id),
 	constraint foreign key (role_name) references roles (name)
 	on update cascade
 ) engine = innodb;
@@ -55,7 +54,7 @@ create table user_roles (
 -- persons
 create table persons (
   tid smallint unsigned not null,
-  id smallint unsigned not null auto_increment,
+  id tinyint unsigned not null auto_increment,
 	primary key (id, tid), 
   
   longname varchar(50) not null,
@@ -71,30 +70,27 @@ create table persons (
   unique key (email, tid),
 
   constraint foreign key (tid) references users (id)
-	on update cascade
 ) engine = innodb;
 
 create table person_phones (
   tid smallint unsigned not null,
-  person_id smallint unsigned not null,
+  person_id tinyint unsigned not null,
 
   phone varchar(15) not null,
   
   unique key (person_id, tid, phone),
   
 	constraint foreign key (person_id, tid) references persons (id, tid)
-  on update cascade
 ) engine = innodb;
 
 create table person_emails (
   tid smallint unsigned not null,
-  person_id smallint unsigned not null,
+  person_id tinyint unsigned not null,
 
   email varchar(30) not null, 
   
   unique key (person_id, tid, email),
   constraint foreign key (person_id, tid) references persons (id, tid)
-  on update cascade
 ) engine = innodb;
 commit;
 
@@ -117,7 +113,6 @@ create table companies (
     key (prefixname),
     
 		constraint  foreign key (tid) references users (id)
-		on update cascade
 ) engine = innodb;
 
 create table company_addresses (
@@ -132,7 +127,6 @@ create table company_addresses (
     unique key (company_id, tid, id),
 
     constraint  foreign key (company_id, tid) references companies (id, tid)
-		on update cascade
 ) engine = innodb;
 
 create table company_ibans (
@@ -142,34 +136,29 @@ create table company_ibans (
     iban char(34), -- International Bank Account Number
     bankname varchar(50),
 
-    primary key (company_id, iban, tid),
+    primary key (company_id, tid, iban),
     
 		constraint  foreign key (company_id, tid) references companies (id, tid)
-		on update cascade
 ) engine = innodb;
 
 -- work_units exists as constraints for works
 create table work_units (
 	tid smallint unsigned not null,
-
 	unit varchar(30) not null,
 
 	primary key (unit, tid),
 
 	constraint foreign key (tid) references users (id)
-	on update cascade
 ) engine = innodb;
 
 -- currencies exists as constraints for works
 create table currencies (
 	tid smallint unsigned not null default 0, -- 0 means default values
-	
 	currency char(3) not null,
 	
 	primary key (currency, tid),
 
 	constraint foreign key (tid) references users (id)
-	on update cascade
 ) engine = innodb;
 
 -- works
@@ -184,14 +173,74 @@ create table works (
 	currency char(3) not null default 'ron',
 
 	primary key (id, tid), 
+    key (currency, tid),
 
-	constraint foreign key (tid) references users (id)
-	on update cascade,
-	constraint foreign key (unit) references work_units (unit)
-	on update cascade,
-	constraint foreign key (currency) references currencies (currency)
+	constraint foreign key (unit, tid) references work_units (unit, tid)
 	on update cascade
+	-- constraint foreign key (currency, tid) references currencies (currency, tid)
+	-- on update cascade
 ) engine = innodb;
+
+delimiter $$
+create trigger currencies_before_insert 
+before insert 
+on currencies for each row 
+begin
+    declare tenent_id smallint;
+    
+    set tenent_id = new.tid;
+    if new.tid=null then
+        set tenent_id=0;
+    end if;
+    if exists(select currency from currencies where tid in (tenent_id, 0) and currency=new.currency limit 1) then
+        set @msgerr = concat("duplicate key currency value ", new.currency); 
+        signal sqlstate '45000' 
+        set message_text = @msgerr;
+    end if;
+end$$
+
+-- insted of foreign key update cascade
+create trigger currencies_after_update 
+after update
+on currencies for each row 
+begin
+    -- currency is system defined
+    -- this should be very rare
+    -- need an index on works.currency
+    if old.tid=0 then
+        update works set currency=new.currency where currency=old.currency;
+    else
+        -- update user defined currency
+        update works set currency=new.currency where tid=old.tid and currency=old.currency;
+    end if;
+end$$
+-- instesd foreign key
+-- check if value exists in parent table when insert/update currency
+create procedure currency_exists
+(in tenent_id smallint, in valute char(3))
+begin
+    -- check existence as a foreign key
+    if 0=exists(select currency from currencies where tid in (tenent_id, 0) and currency=valute limit 1) then
+        set @msgerr = concat("no parent value for key currency: ", valute); 
+        signal sqlstate '45000' 
+        set message_text = @msgerr;
+    end if;
+end$$
+
+create trigger works_before_insert 
+before insert 
+on works for each row 
+begin
+    call currency_exists(new.tid, new.currency);
+end$$
+
+create trigger works_before_update 
+before update 
+on works for each row 
+begin
+    call currency_exists(new.tid, new.currency);
+end$$
+delimiter ;
 
 -- every work pass to ordered stages
 create table work_stages (
@@ -205,17 +254,16 @@ create table work_stages (
 	unique key (tid, ordered),
 
 	constraint foreign key (tid) references users (id)
-	on update cascade
 ) engine = innodb;
 
 create table works_stages (
+	tid smallint unsigned not null,
 	work_id bigint unsigned not null,
 	stage varchar(20) not null,
 
-	constraint foreign key (work_id) references works (id)
-	on update cascade,
-	constraint foreign key (stage) references work_stages (stage)
-	on update cascade
+	constraint foreign key (work_id, tid) references works (id, tid),
+	constraint foreign key (stage, tid) references work_stages (stage, tid)
+    on update cascade
 ) engine = innodb;
 
 -- constraint for entries label
@@ -228,7 +276,6 @@ create table entries_code (
   unique key (code, tid),
 
 	constraint foreign key (tid) references users (id)
-	on update cascade
 ) engine = innodb;
 
 -- inputs
@@ -253,11 +300,8 @@ create table outputs (
 	inputs_id bigint unsigned not null,
 	quantity float not null default 0,
 	
-	constraint foreign key (tid) references users (id)
-	on update cascade,
-	constraint foreign key (works_id) references works (id)
-	on update cascade,
+	constraint foreign key (tid) references users (id),
+	constraint foreign key (works_id) references works (id),
 	constraint foreign key (inputs_id) references inputs (id)
-	on update cascade
 ) engine = innodb;
 

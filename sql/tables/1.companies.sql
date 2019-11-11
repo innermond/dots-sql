@@ -17,7 +17,6 @@ create table companies (
     key (prefixname),
     
 		constraint  foreign key (tid) references users (id)
-		on update cascade
 ) engine = innodb;
 
 create table company_addresses (
@@ -32,7 +31,6 @@ create table company_addresses (
     unique key (company_id, tid, id),
 
     constraint  foreign key (company_id, tid) references companies (id, tid)
-		on update cascade
 ) engine = innodb;
 
 create table company_ibans (
@@ -42,9 +40,8 @@ create table company_ibans (
     iban char(34), -- International Bank Account Number
     bankname varchar(50),
 
-    primary key (company_id, iban, tid),
+    primary key (company_id, tid, iban),
     
 		constraint  foreign key (company_id, tid) references companies (id, tid)
-		on update cascade
 ) engine = innodb;
 

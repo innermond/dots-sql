@@ -15,11 +15,11 @@ insert into persons values
 (@tid, null, 'Bari Irinel', '0798032259', 'bari@gmail.com', true, 'Undeva cu credit', 0, 0),
 (@tid, null, 'Wonder woman', '0728032659', 'ww@gmail.com', false, 'Undeva in spatiu', 0, 0);
 insert into person_phones values
-(@tid, 1, '072548677'),(1, @tid, '0745879652'),
+(@tid, 1, '072548677'),(@tid, 1, '0745879652'),
 (@tid, 2, '0736852497'),
 (@tid, 3, '074998965');
 insert into person_emails values
-(@tid, 1, 'bg@bg.br'),(1, @tid, 'ab@ab.com'),
+(@tid, 1, 'bg@bg.br'),(@tid, 1, 'ab@ab.com'),
 (@tid, 2, 'ba@ba.ro'),
 (@tid, 3, 'cd@cd.com');
 select 'roles';
