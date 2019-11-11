@@ -100,10 +100,8 @@ commit;
 
 -- companies
 create table companies (
-    -- for internal use 
-    id mediumint unsigned not null auto_increment,
-    -- tenent id user id
     tid smallint unsigned not null,
+    id mediumint unsigned not null auto_increment,
 		primary key (id, tid), 
 
     longname varchar(50) not null,
@@ -115,16 +113,16 @@ create table companies (
     
 		unique key (tin),
     unique key (rn),
-    key ix_cc (is_client,is_contractor),
-    key ix_prefix3 (prefixname),
+    key (is_client,is_contractor),
+    key (prefixname),
     
 		constraint  foreign key (tid) references users (id)
 		on update cascade
 ) engine = innodb;
 
 create table company_addresses (
-    company_id mediumint unsigned not null,
     tid smallint unsigned not null,
+    company_id mediumint unsigned not null,
 		id tinyint unsigned not null auto_increment,
 
     address varchar(200),
@@ -138,8 +136,8 @@ create table company_addresses (
 ) engine = innodb;
 
 create table company_ibans (
-    company_id mediumint unsigned not null,
     tid smallint unsigned not null,
+    company_id mediumint unsigned not null,
 
     iban char(34), -- International Bank Account Number
     bankname varchar(50),
@@ -176,8 +174,8 @@ create table currencies (
 
 -- works
 create table works (
-	id bigint unsigned not null auto_increment,
 	tid smallint unsigned not null,
+	id bigint unsigned not null auto_increment,
 
 	label varchar(100) not null default '',
 	quantity float not null default 1,
@@ -235,8 +233,8 @@ create table entries_code (
 
 -- inputs
 create table inputs (
-	id bigint unsigned not null auto_increment,
 	tid smallint unsigned not null,
+	id bigint unsigned not null auto_increment,
 
 	entry varchar(50) not null,
 	quantity float not null default 1,
@@ -250,8 +248,8 @@ create table inputs (
 
 -- outputs
 create table outputs (
-	works_id bigint unsigned not null,
 	tid smallint unsigned not null,
+	works_id bigint unsigned not null,
 	inputs_id bigint unsigned not null,
 	quantity float not null default 0,
 	
@@ -303,20 +301,20 @@ insert into user_roles values
 commit;
 start transaction;
 insert into companies values
-(null, @tid, 'sc volt-media srl', 'ro16728168', 'j40/14133/2004', false, true, default);
+(@tid, null, 'sc volt-media srl', 'ro16728168', 'j40/14133/2004', false, true, default);
 select last_insert_id() into @lastid;
 insert into company_ibans values
-(@lastid, @tid, 'rncb12345678974512', 'reifeissenbank suc. baba novac');
+(@tid, @lastid, 'rncb12345678974512', 'reifeissenbank suc. baba novac');
 insert into company_addresses values
-(@lastid, @tid, null, 'grivitei nr 37', null);
+(@tid, @lastid, null, 'grivitei nr 37', null);
 insert into companies values
-(null, @tid, 'sc tipografix house srl', 'ro22345120', 'j40/12133/2014', false, true, default);
+(@tid, null, 'sc tipografix house srl', 'ro22345120', 'j40/12133/2014', false, true, default);
 select last_insert_id() into @lastid;
 insert into company_ibans values
-(@lastid, @tid, 'rodev345678974512', 'procredit bank titan'),
-(@lastid, @tid, 'as435345675676', 'procredit bank titan');
+(@tid, @lastid, 'rodev345678974512', 'procredit bank titan'),
+(@tid, @lastid, 'as435345675676', 'procredit bank titan');
 insert into company_addresses values
-(@lastid, @tid, null, 'str. Stefan cel Mare', st_srid(point(80.0, 10.0), 4326));
+(@tid, @lastid, null, 'str. Stefan cel Mare', st_srid(point(80.0, 10.0), 4326));
 commit;
 select 'work_unit';
 insert into work_units values (@tid, 'buc'), (@tid, 'ore'), (@tid, 'mp'), (@tid, 'proiect');
@@ -324,9 +322,9 @@ select 'currencies';
 -- get currencies list from https://www.iban.com/currency-codes.html
 insert into currencies (currency) values ('AFN'),('ALL'),('DZD'),('USD'),('EUR'),('AOA'),('XCD'),('ARS'),('AMD'),('AWG'),('AUD'),('AZN'),('BSD'),('BHD'),('BDT'),('BBD'),('BYR'),('BZD'),('XOF'),('BMD'),('BTN'),('INR'),('BOB'),('BOV'),('BAM'),('BWP'),('NOK'),('BRL'),('BND'),('BGN'),('BIF'),('CVE'),('KHR'),('XAF'),('CAD'),('KYD'),('CLF'),('CLP'),('CNY'),('COP'),('COU'),('KMF'),('CDF'),('NZD'),('CRC'),('HRK'),('CUC'),('CUP'),('ANG'),('CZK'),('DKK'),('DJF'),('DOP'),('EGP'),('SVC'),('ERN'),('ETB'),('FKP'),('FJD'),('XPF'),('GMD'),('GEL'),('GHS'),('GIP'),('GTQ'),('GBP'),('GNF'),('GYD'),('HTG'),('HNL'),('HKD'),('HUF'),('ISK'),('IDR'),('XDR'),('IRR'),('IQD'),('ILS'),('JMD'),('JPY'),('JOD'),('KZT'),('KES'),('KPW'),('KRW'),('KWD'),('KGS'),('LAK'),('LBP'),('LSL'),('ZAR'),('LRD'),('LYD'),('CHF'),('MOP'),('MKD'),('MGA'),('MWK'),('MYR'),('MVR'),('MRU'),('MUR'),('XUA'),('MXN'),('MXV'),('MDL'),('MNT'),('MAD'),('MZN'),('MMK'),('NAD'),('NPR'),('NIO'),('NGN'),('OMR'),('PKR'),('PAB'),('PGK'),('PYG'),('PEN'),('PHP'),('PLN'),('QAR'),('RON'),('RUB'),('RWF'),('SHP'),('WST'),('STN'),('SAR'),('RSD'),('SCR'),('SLL'),('SGD'),('XSU'),('SBD'),('SOS'),('SSP'),('LKR'),('SDG'),('SRD'),('SZL'),('SEK'),('CHE'),('CHW'),('SYP'),('TWD'),('TJS'),('TZS'),('THB'),('TOP'),('TTD'),('TND'),('TRY'),('TMT'),('UGX'),('UAH'),('AED'),('USN'),('UYI'),('UYU'),('UZS'),('VUV'),('VEF'),('VND'),('YER'),('ZMW'),('ZWL');
 select 'works';
-insert into works values (null, @tid, 'D.T.P catalog "Șhaorma de Aur"', 1, 'proiect', 138, 'eur');
-insert into works values (null, @tid, 'pliante "Țone de șârmărîe"', 1000, 'buc', 105, 'ron');
-insert into works values (null, @tid, 'banner plastic printare fontă', 5, 'mp', 50, 'usd');
+insert into works values (@tid, null, 'D.T.P catalog "Șhaorma de Aur"', 1, 'proiect', 138, 'eur');
+insert into works values (@tid, null, 'pliante "Țone de șârmărîe"', 1000, 'buc', 105, 'ron');
+insert into works values (@tid, null, 'banner plastic printare fontă', 5, 'mp', 50, 'usd');
 select 'work stages';
 insert into work_stages values
 (@tid, 'inițializată', 'datele initiale se extrag din comanda bruta (email, telefon, etc)', 1),
@@ -344,7 +342,7 @@ insert into entries_code values (@tid, 'DCL A4 200g', 'hartie dcl marime a4 gram
 insert into entries_code values (@tid, 'DCL A4 300g', 'hartie dcl marime a4 gramaj 300g');
 insert into entries_code values (@tid, 'DCL SRA3 300g', 'hartie dcl marime sra3 gramaj 300g');
 select 'inputs';
-insert into inputs values (null, @tid,  'DCL A4 150g', 2500, default);
+insert into inputs values (@tid, null,  'DCL A4 150g', 2500, default);
 insert into inputs (tid, entry, quantity) values (@tid, 'DCL A4 200g', 1500);
-insert into inputs values (null, @tid,  'DCL SRA3 300g', 5800, null);
-insert into inputs values (null, @tid, 'DCL A4 300g', 1500, null);
+insert into inputs values (@tid, null,  'DCL SRA3 300g', 5800, null);
+insert into inputs values (@tid, null, 'DCL A4 300g', 1500, null);

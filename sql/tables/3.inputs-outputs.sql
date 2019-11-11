@@ -13,8 +13,8 @@ create table entries_code (
 
 -- inputs
 create table inputs (
-	id bigint unsigned not null auto_increment,
 	tid smallint unsigned not null,
+	id bigint unsigned not null auto_increment,
 
 	entry varchar(50) not null,
 	quantity float not null default 1,
@@ -28,8 +28,8 @@ create table inputs (
 
 -- outputs
 create table outputs (
-	works_id bigint unsigned not null,
 	tid smallint unsigned not null,
+	works_id bigint unsigned not null,
 	inputs_id bigint unsigned not null,
 	quantity float not null default 0,
 	

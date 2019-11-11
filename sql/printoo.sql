@@ -100,10 +100,8 @@ commit;
 
 -- companies
 create table companies (
-    -- for internal use 
-    id mediumint unsigned not null auto_increment,
-    -- tenent id user id
     tid smallint unsigned not null,
+    id mediumint unsigned not null auto_increment,
 		primary key (id, tid), 
 
     longname varchar(50) not null,
@@ -115,16 +113,16 @@ create table companies (
     
 		unique key (tin),
     unique key (rn),
-    key ix_cc (is_client,is_contractor),
-    key ix_prefix3 (prefixname),
+    key (is_client,is_contractor),
+    key (prefixname),
     
 		constraint  foreign key (tid) references users (id)
 		on update cascade
 ) engine = innodb;
 
 create table company_addresses (
-    company_id mediumint unsigned not null,
     tid smallint unsigned not null,
+    company_id mediumint unsigned not null,
 		id tinyint unsigned not null auto_increment,
 
     address varchar(200),
@@ -138,8 +136,8 @@ create table company_addresses (
 ) engine = innodb;
 
 create table company_ibans (
-    company_id mediumint unsigned not null,
     tid smallint unsigned not null,
+    company_id mediumint unsigned not null,
 
     iban char(34), -- International Bank Account Number
     bankname varchar(50),
@@ -176,8 +174,8 @@ create table currencies (
 
 -- works
 create table works (
-	id bigint unsigned not null auto_increment,
 	tid smallint unsigned not null,
+	id bigint unsigned not null auto_increment,
 
 	label varchar(100) not null default '',
 	quantity float not null default 1,
@@ -235,8 +233,8 @@ create table entries_code (
 
 -- inputs
 create table inputs (
-	id bigint unsigned not null auto_increment,
 	tid smallint unsigned not null,
+	id bigint unsigned not null auto_increment,
 
 	entry varchar(50) not null,
 	quantity float not null default 1,
@@ -250,8 +248,8 @@ create table inputs (
 
 -- outputs
 create table outputs (
-	works_id bigint unsigned not null,
 	tid smallint unsigned not null,
+	works_id bigint unsigned not null,
 	inputs_id bigint unsigned not null,
 	quantity float not null default 0,
 	

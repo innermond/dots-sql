@@ -24,8 +24,8 @@ create table currencies (
 
 -- works
 create table works (
-	id bigint unsigned not null auto_increment,
 	tid smallint unsigned not null,
+	id bigint unsigned not null auto_increment,
 
 	label varchar(100) not null default '',
 	quantity float not null default 1,
