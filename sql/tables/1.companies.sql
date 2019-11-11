@@ -1,7 +1,7 @@
 -- companies
 create table companies (
     tid smallint unsigned not null,
-    id mediumint unsigned not null auto_increment,
+    id tinyint unsigned not null auto_increment,
 		primary key (id, tid), 
 
     longname varchar(50) not null,
@@ -22,7 +22,7 @@ create table companies (
 
 create table company_addresses (
     tid smallint unsigned not null,
-    company_id mediumint unsigned not null,
+    company_id tinyint unsigned not null,
 		id tinyint unsigned not null auto_increment,
 
     address varchar(200),
@@ -37,7 +37,7 @@ create table company_addresses (
 
 create table company_ibans (
     tid smallint unsigned not null,
-    company_id mediumint unsigned not null,
+    company_id tinyint unsigned not null,
 
     iban char(34), -- International Bank Account Number
     bankname varchar(50),
