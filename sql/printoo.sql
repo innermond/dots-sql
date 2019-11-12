@@ -184,24 +184,28 @@ create table works (
 ) engine = innodb;
 
 delimiter $$
--- check if system defined or user defined currency values exists already
--- insert only new values regarding systems ones and user (tid, currency)
--- so other users (differnt tid) can have same currency value
+create procedure currency_system_defined_exists_or_err
+(in tenent_id smallint, in valute char(3))
+begin
+    if tenent_id!=0 and exists(select currency from currencies where tid=0 and currency=valute limit 1) then
+        set @msgerr = concat("duplicate key currency value ", valute); 
+        signal sqlstate '45000' 
+        set message_text = @msgerr;
+    end if;
+end$$
+-- check if system defined currency values exists already
 create trigger currencies_before_insert 
 before insert 
 on currencies for each row 
 begin
-    declare tenent_id smallint;
-    
-    set tenent_id = new.tid;
-    if new.tid=null then
-        set tenent_id=0;
-    end if;
-    if exists(select currency from currencies where tid in (tenent_id, 0) and currency=new.currency limit 1) then
-        set @msgerr = concat("duplicate key currency value ", new.currency); 
-        signal sqlstate '45000' 
-        set message_text = @msgerr;
-    end if;
+    call currency_system_defined_exists_or_err(new.tid, new.currency);
+end$$
+ -- update only there is no other system defined
+create trigger currencies_before_update 
+before update
+on currencies for each row 
+begin
+    call currency_system_defined_exists_or_err(new.tid, new.currency);
 end$$
 
 -- insted of foreign key update cascade
@@ -219,9 +223,10 @@ begin
         update works set currency=new.currency where tid=old.tid and currency=old.currency;
     end if;
 end$$
+
 -- instesd foreign key
 -- check if value exists in parent table when insert/update currency
-create procedure currency_exists
+create procedure currency_exists_or_err
 (in tenent_id smallint, in valute char(3))
 begin
     -- check existence as a foreign key
@@ -232,18 +237,20 @@ begin
     end if;
 end$$
 
+-- ensure currency value exists in currencies.currency
 create trigger works_before_insert 
-before insert 
+before insert
 on works for each row 
 begin
-    call currency_exists(new.tid, new.currency);
+    call currency_exists_or_err(new.tid, new.currency);
 end$$
 
+-- ensure currency value exists in currencies.currency
 create trigger works_before_update 
 before update 
 on works for each row 
 begin
-    call currency_exists(new.tid, new.currency);
+    call currency_exists_or_err(new.tid, new.currency);
 end$$
 delimiter ;
 
