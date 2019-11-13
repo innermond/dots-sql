@@ -13,7 +13,7 @@ insert into company_ibans values
 (@tid, @lastid, 'rodev345678974512', 'procredit bank titan'),
 (@tid, @lastid, 'as435345675676', 'procredit bank titan');
 insert into company_addresses values
-(@tid, @lastid, null, 'str. Stefan cel Mare', st_srid(point(80.0, 10.0), 4326));
+(@tid, @lastid, null, 'str. Stefan cel Mare', point(80.0, 10.0));
 insert into companies values
 (@tid, null, 'sc client srl', 'ro22345110', 'j41/22133/2014', false, true, false, default);
 select last_insert_id() into @lastid;
@@ -21,5 +21,5 @@ insert into company_ibans values
 (@tid, @lastid, 'rodev345678974512', 'procredit bank titan'),
 (@tid, @lastid, 'as435345675676', 'procredit bank titan');
 insert into company_addresses values
-(@tid, @lastid, null, 'str. Carpați', st_srid(point(80.04381, 10.4502), 4326));
+(@tid, @lastid, null, 'str. Carpați', point(80.04381, 10.4502));
 commit;

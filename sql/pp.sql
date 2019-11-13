@@ -51,11 +51,14 @@ create table user_roles (
 	on update cascade
 ) engine = innodb;
 
+-- persons sequence
+-- every tid in persons will have a maximum 100 persons associated
+create sequence persons_seq maxvalue 100 cycle;
 -- persons
 create table persons (
   tid smallint unsigned not null,
-  id tinyint unsigned not null auto_increment,
-	primary key (id, tid), 
+  id tinyint unsigned not null default (next value for persons_seq),
+  primary key (id, tid), 
   
   longname varchar(50) not null,
   phone varchar(15) null, -- unique index allow unknown values as nulls
@@ -123,7 +126,7 @@ create table company_addresses (
 		id tinyint unsigned not null auto_increment,
 
     address varchar(200),
-    location point null srid 4326,
+    location point null default null,
    
 		key (id),
     unique key (company_id, tid, id),
@@ -328,11 +331,11 @@ insert into users
 set @tid=last_insert_id();
 select 'persons';
 insert into persons values
-(@tid, null, 'Gabriel Braila', '0723158571', 'gb@mob.ro', true, 'Bucuresti, Ilioara 1A', 0, 0),
-(@tid, null, 'Stoian Teodora', '0728032259', 'stoian.teodoara@gmail.com', false, 'Bucuresti Dristor', 0, 0),
-(@tid, null, 'Gabor Toni', '0721032259', 'gt@gmail.com', true , 'Afumati, Centura', 0, 0),
-(@tid, null, 'Bari Irinel', '0798032259', 'bari@gmail.com', true, 'Undeva cu credit', 0, 0),
-(@tid, null, 'Wonder woman', '0728032659', 'ww@gmail.com', false, 'Undeva in spatiu', 0, 0);
+(@tid, default, 'Gabriel Braila', '0723158571', 'gb@mob.ro', true, 'Bucuresti, Ilioara 1A', 0, 0),
+(@tid, default, 'Stoian Teodora', '0728032259', 'stoian.teodoara@gmail.com', false, 'Bucuresti Dristor', 0, 0),
+(@tid, default, 'Gabor Toni', '0721032259', 'gt@gmail.com', true , 'Afumati, Centura', 0, 0),
+(@tid, default, 'Bari Irinel', '0798032259', 'bari@gmail.com', true, 'Undeva cu credit', 0, 0),
+(@tid, default, 'Wonder woman', '0728032659', 'ww@gmail.com', false, 'Undeva in spatiu', 0, 0);
 insert into person_phones values
 (@tid, 1, '072548677'),(@tid, 1, '0745879652'),
 (@tid, 2, '0736852497'),
@@ -370,7 +373,7 @@ insert into company_ibans values
 (@tid, @lastid, 'rodev345678974512', 'procredit bank titan'),
 (@tid, @lastid, 'as435345675676', 'procredit bank titan');
 insert into company_addresses values
-(@tid, @lastid, null, 'str. Stefan cel Mare', st_srid(point(80.0, 10.0), 4326));
+(@tid, @lastid, null, 'str. Stefan cel Mare', point(80.0, 10.0));
 insert into companies values
 (@tid, null, 'sc client srl', 'ro22345110', 'j41/22133/2014', false, true, false, default);
 select last_insert_id() into @lastid;
@@ -378,7 +381,7 @@ insert into company_ibans values
 (@tid, @lastid, 'rodev345678974512', 'procredit bank titan'),
 (@tid, @lastid, 'as435345675676', 'procredit bank titan');
 insert into company_addresses values
-(@tid, @lastid, null, 'str. Carpați', st_srid(point(80.04381, 10.4502), 4326));
+(@tid, @lastid, null, 'str. Carpați', point(80.04381, 10.4502));
 commit;
 select 'work_unit';
 insert into work_units values (@tid, 'buc'), (@tid, 'ore'), (@tid, 'mp'), (@tid, 'proiect');
