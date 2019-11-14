@@ -10,7 +10,7 @@ create table users (
 ) engine = innodb; 
 -- while 0 value is allowed for users.id
 
--- need this zero user allowing set persons.tid = 0
+-- need this zero user allowing currencies to have system defined (tid=0) values
 insert into users
 (id, username, password) values
 (0, "zerouser", "$2a$14$Aij9nZ5Dym2JJiiAc2nY..ZIlCTZrtGJSRqU9VwifPsdK8KL3Vzky");
