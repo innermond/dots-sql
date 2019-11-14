@@ -111,16 +111,32 @@ delimiter ;
 
 -- every work pass to ordered stages
 create table work_stages (
+<<<<<<< HEAD
 	tid smallint unsigned not null,
+=======
+<<<<<<< HEAD
+	id int unsigned not null primary key auto_increment,
+	stage varchar(20) not null default "",
+	description varchar(150) null default "",
+	ordered int unsigned not null,
+	unique key (stage, ordered)
+=======
+    tid int unsigned not null,
+>>>>>>> ed61e1c1ef8c09dc6992bf07c6b9dcb3189dfe12
 
 	stage varchar(20) not null,
 	description varchar(150) null default "",
 	ordered tinyint unsigned not null,
 
+<<<<<<< HEAD
 	primary key (stage, tid),
 	unique key (tid, ordered),
 
 	constraint foreign key (tid) references users (id)
+=======
+	unique key (ordered, tid)
+>>>>>>> 89e6d8a85b0c3b2675b5a5c9db07067d949b973f
+>>>>>>> ed61e1c1ef8c09dc6992bf07c6b9dcb3189dfe12
 ) engine = innodb;
 
 create table works_stages (

@@ -4,3 +4,6 @@
 *~
 # auto-generated tag files
 tags
+
+# generated sql
+sql/*.sql
