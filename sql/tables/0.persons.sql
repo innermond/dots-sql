@@ -43,11 +43,14 @@ create table user_roles (
 	on update cascade
 ) engine = innodb;
 
+-- persons sequence
+-- every tid in persons will have a maximum 100 persons associated
+create sequence persons_seq maxvalue 100 cycle;
 -- persons
 create table persons (
   tid smallint unsigned not null,
-  id tinyint unsigned not null auto_increment,
-	primary key (id, tid), 
+  id tinyint unsigned not null default (next value for persons_seq),
+  primary key (id, tid), 
   
   longname varchar(50) not null,
   phone varchar(15) null, -- unique index allow unknown values as nulls

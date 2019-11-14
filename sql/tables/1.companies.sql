@@ -27,7 +27,7 @@ create table company_addresses (
 		id tinyint unsigned not null auto_increment,
 
     address varchar(200),
-    location point null srid 4326,
+    location point null default null,
    
 		key (id),
     unique key (company_id, tid, id),
