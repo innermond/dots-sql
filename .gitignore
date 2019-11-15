@@ -6,4 +6,4 @@
 tags
 
 # generated sql
-/sql/*.sql
+**/sql/*.sql
