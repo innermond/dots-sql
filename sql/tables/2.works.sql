@@ -1,43 +1,41 @@
 -- work_units exists as constraints for works
 create table work_units (
-	tid smallint unsigned not null,
-	unit varchar(30) not null,
-
+	tid smallint,
+	unit varchar(30),
 	primary key (unit, tid),
 
-	constraint foreign key (tid) references users (id)
-) engine = innodb;
+	foreign key (tid) references users (id)
+);
 
 -- currencies exists as constraints for works
 create table currencies (
-	tid smallint unsigned not null default 0, -- 0 means default values
-	currency char(3) not null,
-	
+	tid smallint not null default 0, -- 0 means default values
+	currency char(3),
 	primary key (currency, tid),
 
-	constraint foreign key (tid) references users (id)
-) engine = innodb;
+	foreign key (tid) references users (id)
+);
 
 -- works
 create table works (
-	tid smallint unsigned not null,
-	id bigint unsigned not null auto_increment,
+	tid smallint,
+	id bigserial,
+	primary key (id, tid), 
 
-	label varchar(100) not null default '',
+	label varchar(100) not null,
 	quantity float not null default 1,
 	unit varchar(30) not null default 'buc',
 	unitprice numeric(15, 2),
 	currency char(3) not null default 'ron',
 
-	primary key (id, tid), 
-    key (currency, tid),
 
-	constraint foreign key (unit, tid) references work_units (unit, tid)
+	foreign key (unit, tid) references work_units (unit, tid)
 	on update cascade
-	-- constraint foreign key (currency, tid) references currencies (currency, tid)
+	-- foreign key (currency, tid) references currencies (currency, tid)
 	-- on update cascade
-) engine = innodb;
-
+);
+create index on works (currency, tid);
+/*
 delimiter $$
 create procedure currency_system_defined_exists_or_err
 (in tenent_id smallint, in valute char(3))
@@ -108,44 +106,29 @@ begin
     call currency_exists_or_err(new.tid, new.currency);
 end$$
 delimiter ;
-
+*/
 -- every work pass to ordered stages
 create table work_stages (
-<<<<<<< HEAD
-	tid smallint unsigned not null,
-=======
-<<<<<<< HEAD
-	id int unsigned not null primary key auto_increment,
-	stage varchar(20) not null default "",
-	description varchar(150) null default "",
-	ordered int unsigned not null,
-	unique key (stage, ordered)
-=======
-    tid int unsigned not null,
->>>>>>> ed61e1c1ef8c09dc6992bf07c6b9dcb3189dfe12
-
+	tid smallint not null,
 	stage varchar(20) not null,
-	description varchar(150) null default "",
-	ordered tinyint unsigned not null,
+	description varchar(150) null,
+	ordered int not null,
 
-<<<<<<< HEAD
+	-- stage is unique for an entire tid
 	primary key (stage, tid),
-	unique key (tid, ordered),
+	unique (tid, ordered),
 
-	constraint foreign key (tid) references users (id)
-=======
-	unique key (ordered, tid)
->>>>>>> 89e6d8a85b0c3b2675b5a5c9db07067d949b973f
->>>>>>> ed61e1c1ef8c09dc6992bf07c6b9dcb3189dfe12
-) engine = innodb;
+	foreign key (tid) references users (id)
+);
 
 create table works_stages (
-	tid smallint unsigned not null,
-	work_id bigint unsigned not null,
+	tid smallint not null,
+	work_id bigint not null,
 	stage varchar(20) not null,
+	primary key (work_id, stage, tid),
 
-	constraint foreign key (work_id, tid) references works (id, tid),
-	constraint foreign key (stage, tid) references work_stages (stage, tid)
+	foreign key (work_id, tid) references works (id, tid),
+	foreign key (stage, tid) references work_stages (stage, tid)
     on update cascade
-) engine = innodb;
+);
 

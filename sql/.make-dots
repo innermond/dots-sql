@@ -1,0 +1,40 @@
+#!/bin/bash
+
+if [ `whoami` != postgres ]; then
+
+	common=""
+	# files with sql extension from tables diectory
+	for f in tables/*.sql;do
+		# repeat basename and a comma pattern
+		common="$common${f##*/},"
+	done
+	# remove last char, which is a comma
+	common="${common%?}"
+	eval "cat tables/{$common} > dots.sql"
+	# eval "cat populate/{$common} > populate.sql"
+	# cat dots.sql populate.sql > pp.sql
+	cat dots.sql > pp.sql
+	sqlfile=pp.sql
+
+	exec sudo su -c $0 postgres
+
+fi
+
+# script must be called by postgres user
+# as it drops and create database
+# and "postgres" user has this privileges
+# example: sudo su postgres <this script>
+psql -f init.sql
+
+#if [ "$1" == create ]; then 
+	sqlfile=dots.sql
+	echo "using $sqlfile"
+	psql "postgresql://dot:M0b1d1c3@0.0.0/dots" -f "$sqlfile"
+	exit 0
+#fi
+#if [ "$1" == fill ]; then 
+#	sqlfile=populate.sql
+#	echo "using $sqlfile"
+#	psql "postgresql://dot:M0b1d1c3@0.0.0/dots" -f "$sqlfile"
+#	exit 0
+#fi

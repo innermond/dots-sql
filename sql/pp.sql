@@ -1,28 +1,20 @@
-drop database if exists printoo;
--- create utf8-mb4 database
-create database printoo character set = utf8mb4 collate = utf8mb4_unicode_ci;
-use printoo;
--- database needs to store date in utc +0:00
-set global time_zone = '+0:00';
-set global sql_mode = 'no_auto_value_on_zero';
-
 start transaction;
 -- users
 create table users (
-  id smallint unsigned not null primary key auto_increment,
+  id smallserial primary key,
 
   username varchar(16) not null,
   password varchar(64) not null, -- is hashed
 
-  unique key (username)
-) engine = innodb; 
+  unique (username)
+); 
 -- while 0 value is allowed for users.id
 
--- need this zero user allowing set persons.tid = 0
-insert into users
+-- need this zero user allowing currencies to have system defined (tid=0) values
+/*insert into users
 (id, username, password) values
 (0, "zerouser", "$2a$14$Aij9nZ5Dym2JJiiAc2nY..ZIlCTZrtGJSRqU9VwifPsdK8KL3Vzky");
-
+*/
 -- on delete users.id echoed field persons.tid will be set to 0 not null
 -- persons.tid is part of a primary key so cannot be set to null
 /*delimiter $$
@@ -37,27 +29,28 @@ delimiter ;*/
 -- roles
 create table roles (
 	name varchar(16) not null primary key
-) engine = innodb;
+);
 
 -- user_roles
 create table user_roles (
-	user_id smallint unsigned not null,
+	user_id smallint not null check (user_id > 0),
 	role_name varchar(16) not null,
 
-	unique key (user_id, role_name),
+	unique (user_id, role_name),
 
-	constraint foreign key (user_id) references users (id),
-	constraint foreign key (role_name) references roles (name)
+	foreign key (user_id) references users (id),
+	foreign key (role_name) references roles (name)
 	on update cascade
-) engine = innodb;
+);
 
+-- persons
 -- persons sequence
 -- every tid in persons will have a maximum 100 persons associated
-create sequence persons_seq maxvalue 100 cycle;
--- persons
+create sequence persons_id_seq maxvalue 100 cycle;
+
 create table persons (
-  tid smallint unsigned not null,
-  id tinyint unsigned not null default (next value for persons_seq),
+  tid smallint not null,
+  id smallint not null default nextval('persons_id_seq'),
   primary key (id, tid), 
   
   longname varchar(50) not null,
@@ -68,39 +61,41 @@ create table persons (
   is_client boolean not null default false, -- a person can be client or contractor or both
   is_contractor boolean not null default false,
   
-  key (is_client,is_contractor),
-  unique key (phone, tid),
-  unique key (email, tid),
+  --index (is_client, is_contractor),
+  unique (phone, tid),
+  unique (email, tid),
 
-  constraint foreign key (tid) references users (id)
-) engine = innodb;
+  foreign key (tid) references users (id)
+);
+
+alter sequence persons_id_seq owned by persons.id;
 
 create table person_phones (
-  tid smallint unsigned not null,
-  person_id tinyint unsigned not null,
+  tid smallint not null,
+  person_id smallint not null,
 
   phone varchar(15) not null,
   
-  unique key (person_id, tid, phone),
-  
-	constraint foreign key (person_id, tid) references persons (id, tid)
-) engine = innodb;
+  unique (person_id, tid, phone),
+	foreign key (person_id, tid) references persons (id, tid)
+);
 
 create table person_emails (
-  tid smallint unsigned not null,
-  person_id tinyint unsigned not null,
+  tid smallint not null,
+  person_id smallint not null,
 
   email varchar(30) not null, 
   
-  unique key (person_id, tid, email),
-  constraint foreign key (person_id, tid) references persons (id, tid)
-) engine = innodb;
+  unique (person_id, tid, email),
+  foreign key (person_id, tid) references persons (id, tid)
+);
 commit;
 
 -- companies
 create table companies (
-    tid smallint unsigned not null,
-    id tinyint unsigned not null auto_increment,
+    tid smallint not null,
+    id smallserial,
+		primary key (id, tid), 
 
     longname varchar(50) not null,
     tin varchar(30) not null, -- taxpayer identification number, in RO is cui
@@ -108,109 +103,77 @@ create table companies (
     is_client boolean not null default true, -- a company can be client or contractor or both
     is_contractor boolean not null default false,
 		is_mine boolean not null default false, -- can emit bills
-    prefixname char(3) generated always as (left(longname,3)),
+    prefixname char(3) generated always as (substring(longname from 1 for 3)) stored,
     
-		primary key (id, tid), 
-		unique key (tin, rn),
-    key (is_client, tid),
-    key (is_contractor, tid),
-    key (is_mine, tid),
-    key (prefixname, tid),
-    
-		constraint  foreign key (tid) references users (id)
-) engine = innodb;
+		unique (tin, rn),
+		foreign key (tid) references users (id)
+);
+create index on companies (is_client, tid);
+create index on companies (is_contractor, tid);
+create index on companies (is_mine, tid);
+create index on companies (prefixname, tid);
 
 create table company_addresses (
-<<<<<<< HEAD
-    tid smallint unsigned not null,
-    company_id tinyint unsigned not null,
-		id tinyint unsigned not null auto_increment,
-
-    address varchar(200),
-    location point null default null,
-   
-		key (id),
-    unique key (company_id, tid, id),
-
-    constraint  foreign key (company_id, tid) references companies (id, tid)
-) engine = innodb;
+    tid smallint not null,
+    company_id smallint not null,
+		id smallint not null,
+		address varchar(200),
+		-- location point not null srid 4326,
+		unique (address),
+		-- spatial key (location),
+		foreign key (company_id, tid) references companies (id, tid)
+		on delete cascade
+);
 
 create table company_ibans (
-    tid smallint unsigned not null,
-    company_id tinyint unsigned not null,
-
-    iban char(34), -- International Bank Account Number
-    bankname varchar(50),
-
+		tid smallint not null,
+		company_id smallint not null,
+		iban char(34), -- International Bank Account Number
     primary key (company_id, tid, iban),
-    
-		constraint  foreign key (company_id, tid) references companies (id, tid)
-=======
-  id int unsigned not null primary key auto_increment,
-  company_id int unsigned not null,
-	address varchar(200),
-	location point not null srid 4326,
-	unique key (address),
-	spatial key (location),
-	constraint  foreign key (company_id) references companies (id)
-	on delete cascade
-) engine = innodb;
-
-<<<<<<< HEAD
-create table company_ibans (
-=======
-create table ibans (
->>>>>>> 89e6d8a85b0c3b2675b5a5c9db07067d949b973f
-  id int unsigned not null primary key auto_increment,
-  company_id int unsigned not null,
-	iban char(34), -- International Bank Account Number
-	bankname varchar(50),
-	unique key (iban),
-	constraint  foreign key (company_id) references companies (id)
-	on delete cascade
->>>>>>> ed61e1c1ef8c09dc6992bf07c6b9dcb3189dfe12
-) engine = innodb;
+		bankname varchar(50),
+		unique (iban),
+		foreign key (company_id, tid) references companies (id, tid)
+		on delete cascade
+);
 
 -- work_units exists as constraints for works
 create table work_units (
-	tid smallint unsigned not null,
-	unit varchar(30) not null,
-
+	tid smallint,
+	unit varchar(30),
 	primary key (unit, tid),
 
-	constraint foreign key (tid) references users (id)
-) engine = innodb;
+	foreign key (tid) references users (id)
+);
 
 -- currencies exists as constraints for works
 create table currencies (
-	tid smallint unsigned not null default 0, -- 0 means default values
-	currency char(3) not null,
-	
+	tid smallint not null default 0, -- 0 means default values
+	currency char(3),
 	primary key (currency, tid),
 
-	constraint foreign key (tid) references users (id)
-) engine = innodb;
+	foreign key (tid) references users (id)
+);
 
 -- works
 create table works (
-	tid smallint unsigned not null,
-	id bigint unsigned not null auto_increment,
+	tid smallint,
+	id bigserial,
+	primary key (id, tid), 
 
-	label varchar(100) not null default '',
+	label varchar(100) not null,
 	quantity float not null default 1,
 	unit varchar(30) not null default 'buc',
 	unitprice numeric(15, 2),
 	currency char(3) not null default 'ron',
 
-	primary key (id, tid), 
-    key (currency, tid),
 
-	constraint foreign key (unit, tid) references work_units (unit, tid)
+	foreign key (unit, tid) references work_units (unit, tid)
 	on update cascade
-	-- constraint foreign key (currency, tid) references currencies (currency, tid)
+	-- foreign key (currency, tid) references currencies (currency, tid)
 	-- on update cascade
-) engine = innodb;
-
+);
+create index on works (currency, tid);
+/*
 delimiter $$
 create procedure currency_system_defined_exists_or_err
 (in tenent_id smallint, in valute char(3))
@@ -281,197 +244,67 @@ begin
     call currency_exists_or_err(new.tid, new.currency);
 end$$
 delimiter ;
-
+*/
 -- every work pass to ordered stages
 create table work_stages (
-	tid smallint unsigned not null,
-
+	tid smallint not null,
 	stage varchar(20) not null,
-	description varchar(150) null default "",
-	ordered tinyint unsigned not null,
+	description varchar(150) null,
+	ordered int not null,
 
+	-- stage is unique for an entire tid
 	primary key (stage, tid),
-	unique key (tid, ordered),
+	unique (tid, ordered),
 
-	constraint foreign key (tid) references users (id)
-) engine = innodb;
+	foreign key (tid) references users (id)
+);
 
 create table works_stages (
-	tid smallint unsigned not null,
-	work_id bigint unsigned not null,
+	tid smallint not null,
+	work_id bigint not null,
 	stage varchar(20) not null,
+	primary key (work_id, stage, tid),
 
-	constraint foreign key (work_id, tid) references works (id, tid),
-	constraint foreign key (stage, tid) references work_stages (stage, tid)
+	foreign key (work_id, tid) references works (id, tid),
+	foreign key (stage, tid) references work_stages (stage, tid)
     on update cascade
-) engine = innodb;
+);
 
 -- constraint for entries label
 create table entries_code (
-  tid smallint unsigned not null,
+  tid smallint not null,
   
   code varchar(50) not null,
   description varchar(255) null,
 
-  unique key (code, tid),
+  unique (code, tid),
 
-	constraint foreign key (tid) references users (id)
-) engine = innodb;
+	foreign key (tid) references users (id)
+);
 
 -- inputs
 create table inputs (
-	tid smallint unsigned not null,
-	id bigint unsigned not null auto_increment,
+	tid smallint not null,
+	id bigint not null,
 
 	entry varchar(50) not null,
 	quantity float not null default 1,
-	updated datetime null on update current_timestamp,
+	updated timestamp not null default now(), -- on update current_timestamp,
 	
 	primary key (id, tid),
 	
-	constraint foreign key (entry, tid) references entries_code (code, tid)
+	foreign key (entry, tid) references entries_code (code, tid)
 	on update cascade
-) engine = innodb;
+);
 
 -- outputs
 create table outputs (
-	tid smallint unsigned not null,
-	works_id bigint unsigned not null,
-	inputs_id bigint unsigned not null,
+	tid smallint not null,
+	works_id bigint not null,
+	inputs_id bigint not null,
 	quantity float not null default 0,
 	
-	constraint foreign key (tid) references users (id),
-	constraint foreign key (works_id) references works (id),
-	constraint foreign key (inputs_id) references inputs (id)
-) engine = innodb;
+	foreign key (works_id, tid) references works (id, tid),
+	foreign key (inputs_id, tid) references inputs (id, tid)
+);
 
-start transaction;
-<<<<<<< HEAD
-=======
-insert into companies values
-(null, 'sc volt-media srl', 'ro16728168', 'j40/14133/2004', false, true, default);
-select last_insert_id() into @lastid;
-insert into company_ibans values
-(null, @lastid, 'rncb12345678974512', 'reifeissenbank suc. baba novac');
-insert into companies values
-(null, 'sc tipografix house srl', 'ro22345120', 'j40/12133/2014', false, true, default);
-select last_insert_id() into @lastid;
-insert into company_ibans values
-(null, @lastid, 'DK1820005000015611', 'procredit bank titan'),
-(null, @lastid, 'DK7752950010016924', 'procredit bank titan');
-commit;
-select 'work_unit';
-insert into work_units values ('buc'), ('ore'), ('mp'), ('proiect');
-select 'currencies';
--- get currencies list from https://www.iban.com/currency-codes.html
-insert into currencies values ('AFN'),('ALL'),('DZD'),('USD'),('EUR'),('AOA'),('XCD'),('ARS'),('AMD'),('AWG'),('AUD'),('AZN'),('BSD'),('BHD'),('BDT'),('BBD'),('BYR'),('BZD'),('XOF'),('BMD'),('BTN'),('INR'),('BOB'),('BOV'),('BAM'),('BWP'),('NOK'),('BRL'),('BND'),('BGN'),('BIF'),('CVE'),('KHR'),('XAF'),('CAD'),('KYD'),('CLF'),('CLP'),('CNY'),('COP'),('COU'),('KMF'),('CDF'),('NZD'),('CRC'),('HRK'),('CUC'),('CUP'),('ANG'),('CZK'),('DKK'),('DJF'),('DOP'),('EGP'),('SVC'),('ERN'),('ETB'),('FKP'),('FJD'),('XPF'),('GMD'),('GEL'),('GHS'),('GIP'),('GTQ'),('GBP'),('GNF'),('GYD'),('HTG'),('HNL'),('HKD'),('HUF'),('ISK'),('IDR'),('XDR'),('IRR'),('IQD'),('ILS'),('JMD'),('JPY'),('JOD'),('KZT'),('KES'),('KPW'),('KRW'),('KWD'),('KGS'),('LAK'),('LBP'),('LSL'),('ZAR'),('LRD'),('LYD'),('CHF'),('MOP'),('MKD'),('MGA'),('MWK'),('MYR'),('MVR'),('MRU'),('MUR'),('XUA'),('MXN'),('MXV'),('MDL'),('MNT'),('MAD'),('MZN'),('MMK'),('NAD'),('NPR'),('NIO'),('NGN'),('OMR'),('PKR'),('PAB'),('PGK'),('PYG'),('PEN'),('PHP'),('PLN'),('QAR'),('RON'),('RUB'),('RWF'),('SHP'),('WST'),('STN'),('SAR'),('RSD'),('SCR'),('SLL'),('SGD'),('XSU'),('SBD'),('SOS'),('SSP'),('LKR'),('SDG'),('SRD'),('SZL'),('SEK'),('CHE'),('CHW'),('SYP'),('TWD'),('TJS'),('TZS'),('THB'),('TOP'),('TTD'),('TND'),('TRY'),('TMT'),('UGX'),('UAH'),('AED'),('USN'),('UYI'),('UYU'),('UZS'),('VUV'),('VEF'),('VND'),('YER'),('ZMW'),('ZWL');
-select 'works';
-insert into works values (null, 'D.T.P catalog "Șhaorma de Aur"', 1, 'proiect', 138, 'eur');
-insert into works values (null, 'pliante "Țone de șârmărîe"', 1000, 'buc', 105, 'ron');
-insert into works values (null, 'banner plastic printare fontă', 5, 'mp', 50, 'usd');
-select 'work stages';
-insert into work_stages values
-('inițializată', 'datele initiale se extrag din comanda bruta (email, telefon, etc)', 1),
-('verificată', 'datele inițiale sunt aprobate, comanda e formulată corect', 2),
-('dată în lucru', 'comanda se trimite în atelier, pentru execuție', 3),
-('finalizată', 'comanda a fost executată', 4);
-select 'works_stages';
-insert into works_stages values
-(1, 'inițializată'), (1, 'verificată'),
-(2, 'inițializată'), (2, 'verificată'), (2, 'dată în lucru'),
-(3, 'inițializată'), (3, 'verificată'), (3, 'dată în lucru'), (3, 'finalizată');
-start transaction;
->>>>>>> ed61e1c1ef8c09dc6992bf07c6b9dcb3189dfe12
-select 'users'; 
--- test passords are gabiuser1 gabiuser2 teouser1
-insert into users
-(id, username, password) values
-(null, "gabiuser1", "$2a$14$Aij9nZ5Dym2JJiiAc2nY..ZIlCTZrtGJSRqU9VwifPsdK8KL3Vzky"), 
-(null, "gabiuser2", "$2a$14$15TQeheQKVkI7bysOpeETe99ktHTH8xMrxuqd4oAunRRfz3JLf6Uy"), 
-(null, "teouser1", "$2a$14$klL5o18v1rub9FZzM50DDOg3ntE/GxZTLv8uYFd8KtF5wkxcU2Uqi"); 
-set @tid=last_insert_id();
-select 'persons';
-insert into persons values
-(@tid, default, 'Gabriel Braila', '0723158571', 'gb@mob.ro', true, 'Bucuresti, Ilioara 1A', 0, 0),
-(@tid, default, 'Stoian Teodora', '0728032259', 'stoian.teodoara@gmail.com', false, 'Bucuresti Dristor', 0, 0),
-(@tid, default, 'Gabor Toni', '0721032259', 'gt@gmail.com', true , 'Afumati, Centura', 0, 0),
-(@tid, default, 'Bari Irinel', '0798032259', 'bari@gmail.com', true, 'Undeva cu credit', 0, 0),
-(@tid, default, 'Wonder woman', '0728032659', 'ww@gmail.com', false, 'Undeva in spatiu', 0, 0);
-insert into person_phones values
-(@tid, 1, '072548677'),(@tid, 1, '0745879652'),
-(@tid, 2, '0736852497'),
-(@tid, 3, '074998965');
-insert into person_emails values
-(@tid, 1, 'bg@bg.br'),(@tid, 1, 'ab@ab.com'),
-(@tid, 2, 'ba@ba.ro'),
-(@tid, 3, 'cd@cd.com');
-select 'roles';
-insert into roles values
-('anonymous'),
-('user'),
-('admin'),
-('superadmin');
-select 'user_roles';
-insert into user_roles values
-(1, 'superadmin'),
-(1, 'admin'),
-(1, 'user'),
-(2, 'admin'),
-(3, 'user');
-commit;
-start transaction;
-insert into companies values
-(@tid, null, 'sc volt-media srl', 'ro16728168', 'j40/14133/2004', false, true, true, default);
-select last_insert_id() into @lastid;
-insert into company_ibans values
-(@tid, @lastid, 'rncb12345678974512', 'reifeissenbank suc. baba novac');
-insert into company_addresses values
-(@tid, @lastid, null, 'grivitei nr 37', null);
-insert into companies values
-(@tid, null, 'sc tipografix house srl', 'ro22345120', 'j40/12133/2014', false, true, true, default);
-select last_insert_id() into @lastid;
-insert into company_ibans values
-(@tid, @lastid, 'rodev345678974512', 'procredit bank titan'),
-(@tid, @lastid, 'as435345675676', 'procredit bank titan');
-insert into company_addresses values
-(@tid, @lastid, null, 'str. Stefan cel Mare', point(80.0, 10.0));
-insert into companies values
-(@tid, null, 'sc client srl', 'ro22345110', 'j41/22133/2014', false, true, false, default);
-select last_insert_id() into @lastid;
-insert into company_ibans values
-(@tid, @lastid, 'rodev345678974512', 'procredit bank titan'),
-(@tid, @lastid, 'as435345675676', 'procredit bank titan');
-insert into company_addresses values
-(@tid, @lastid, null, 'str. Carpați', point(80.04381, 10.4502));
-commit;
-select 'work_unit';
-insert into work_units values (@tid, 'buc'), (@tid, 'ore'), (@tid, 'mp'), (@tid, 'proiect');
-select 'currencies';
--- get currencies list from https://www.iban.com/currency-codes.html
-insert into currencies (currency) values ('AFN'),('ALL'),('DZD'),('USD'),('EUR'),('AOA'),('XCD'),('ARS'),('AMD'),('AWG'),('AUD'),('AZN'),('BSD'),('BHD'),('BDT'),('BBD'),('BYR'),('BZD'),('XOF'),('BMD'),('BTN'),('INR'),('BOB'),('BOV'),('BAM'),('BWP'),('NOK'),('BRL'),('BND'),('BGN'),('BIF'),('CVE'),('KHR'),('XAF'),('CAD'),('KYD'),('CLF'),('CLP'),('CNY'),('COP'),('COU'),('KMF'),('CDF'),('NZD'),('CRC'),('HRK'),('CUC'),('CUP'),('ANG'),('CZK'),('DKK'),('DJF'),('DOP'),('EGP'),('SVC'),('ERN'),('ETB'),('FKP'),('FJD'),('XPF'),('GMD'),('GEL'),('GHS'),('GIP'),('GTQ'),('GBP'),('GNF'),('GYD'),('HTG'),('HNL'),('HKD'),('HUF'),('ISK'),('IDR'),('XDR'),('IRR'),('IQD'),('ILS'),('JMD'),('JPY'),('JOD'),('KZT'),('KES'),('KPW'),('KRW'),('KWD'),('KGS'),('LAK'),('LBP'),('LSL'),('ZAR'),('LRD'),('LYD'),('CHF'),('MOP'),('MKD'),('MGA'),('MWK'),('MYR'),('MVR'),('MRU'),('MUR'),('XUA'),('MXN'),('MXV'),('MDL'),('MNT'),('MAD'),('MZN'),('MMK'),('NAD'),('NPR'),('NIO'),('NGN'),('OMR'),('PKR'),('PAB'),('PGK'),('PYG'),('PEN'),('PHP'),('PLN'),('QAR'),('RON'),('RUB'),('RWF'),('SHP'),('WST'),('STN'),('SAR'),('RSD'),('SCR'),('SLL'),('SGD'),('XSU'),('SBD'),('SOS'),('SSP'),('LKR'),('SDG'),('SRD'),('SZL'),('SEK'),('CHE'),('CHW'),('SYP'),('TWD'),('TJS'),('TZS'),('THB'),('TOP'),('TTD'),('TND'),('TRY'),('TMT'),('UGX'),('UAH'),('AED'),('USN'),('UYI'),('UYU'),('UZS'),('VUV'),('VEF'),('VND'),('YER'),('ZMW'),('ZWL');
-insert into currencies values (@tid, 'blk');
-select 'works';
-insert into works values (@tid, null, 'D.T.P catalog "Șhaorma de Aur"', 1, 'proiect', 138, 'eur');
-insert into works values (@tid, null, 'pliante "Țone de șârmărîe"', 1000, 'buc', 105, 'ron');
-insert into works values (@tid, null, 'banner plastic printare fontă', 5, 'mp', 50, 'usd');
-select 'work stages';
-insert into work_stages values
-(@tid, 'inițializată', 'datele initiale se extrag din comanda bruta (email, telefon, etc)', 1),
-(@tid, 'verificată', 'datele inițiale sunt aprobate, comanda e formulată corect', 2),
-(@tid, 'dată în lucru', 'comanda se trimite în atelier, pentru execuție', 3),
-(@tid, 'finalizată', 'comanda a fost executată', 4);
-select 'works_stages';
-insert into works_stages values
-(@tid, 1, 'inițializată'), (@tid, 1, 'verificată'),
-(@tid, 2, 'inițializată'), (@tid, 2, 'verificată'), (@tid, 2, 'dată în lucru'),
-(@tid, 3, 'inițializată'), (@tid, 3, 'verificată'), (@tid, 3, 'dată în lucru'), (@tid, 3, 'finalizată');
-select 'entries_code';
-insert into entries_code values (@tid, 'DCL A4 150g', 'hartie dcl marime a4 gramaj 150g');
-insert into entries_code values (@tid, 'DCL A4 200g', 'hartie dcl marime a4 gramaj 200g');
-insert into entries_code values (@tid, 'DCL A4 300g', 'hartie dcl marime a4 gramaj 300g');
-insert into entries_code values (@tid, 'DCL SRA3 300g', 'hartie dcl marime sra3 gramaj 300g');
-select 'inputs';
-insert into inputs values (@tid, null,  'DCL A4 150g', 2500, default);
-insert into inputs (tid, entry, quantity) values (@tid, 'DCL A4 200g', 1500);
-insert into inputs values (@tid, null,  'DCL SRA3 300g', 5800, null);
-insert into inputs values (@tid, null, 'DCL A4 300g', 1500, null);
